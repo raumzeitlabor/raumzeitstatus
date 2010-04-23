@@ -1,5 +1,5 @@
 <?php
-$set = $_GET['set'];
+$set = (int)$_GET['set'];
 $handler = fopen("room" , "w+");
 switch($set){
 	case 0:

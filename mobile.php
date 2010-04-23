@@ -1,6 +1,6 @@
 <?php
 
-$set = $_POST['set'];
+$set = (int)$_POST['set'];
 
 if(isset($set)){
 	$handler = fopen("room" , "w+");
