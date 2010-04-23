@@ -1,21 +1,16 @@
 <?php
-$set = (int)$_GET['set'];
-$handler = fopen("room" , "w+");
-switch($set){
+
+if (isset($_GET['set'])) {
+	$set = (int)$_GET['set'];
+	$handler = fopen("room" , "w+");
+	switch ($set) {
 	case 0:
-		fwrite($handler, "0");
-		break;
-		
 	case 1:
-		fwrite($handler, "1");
-		break;
-		
 	case 2:
-		fwrite($handler, "2");
+		file_put_contents('room', $set);
 		break;
-	
 	default:
 		echo "Fehler. Status konnte nicht gesetzt werden.";
 }
-fclose($handler);
+
 ?>

@@ -1,23 +1,16 @@
 <?php
 
-$set = (int)$_POST['set'];
-
-if(isset($set)){
-	$handler = fopen("room" , "w+");
-	switch($set){
-	case 1:
-		fwrite($handler, "1");
-		break;
-		
+if (isset($_POST['set'])) {
+	$set = (int)$_POST['set'];
+	switch ($set) {
 	case 0:
-		fwrite($handler, "0");
+	case 1:
+		file_put_contents('room', $set);
 		break;
-	
 	}
-	fclose($handler);
 }
-?>
 
+?>
 <html>
 <head>
 	<title>RaumZeitLabor Raumstatus</title>
@@ -28,18 +21,16 @@ if(isset($set)){
 	<span style="text-align: center;"><img width="150px" style="display: block; margin-left: auto; margin-right: auto;" src="status.php">
 	<form action="mobile.php" method="post">
 		<?php
-			$handler = fopen("room" , "r");
-				$roomStatus = fgets($handler, 2);
- 				switch($roomStatus){
-					case 1:
-			        	$info = '<input style="font-size: 20px;" type="submit" value="Raum schlie&szlig;en"><input type="hidden" value="0" name="set">';
-						break;
-			        
-			        case 0:
-			        	$info = '<input style="font-size: 20px;" type="submit" value="Raum &ouml;ffnen"><input type="hidden" value="1" name="set">';
-						break;
-				}
-				echo $info;
+			$roomStatus = (int)file_get_contents('room');
+			switch ($roomStatus) {
+			case 1:
+				$info = '<input style="font-size: 20px;" type="submit" value="Raum schlie&szlig;en"><input type="hidden" value="0" name="set">';
+				break;
+			case 0:
+				$info = '<input style="font-size: 20px;" type="submit" value="Raum &ouml;ffnen"><input type="hidden" value="1" name="set">';
+				break;
+			}
+			echo $info;
 		?>
 	</form></span>
 </body>
