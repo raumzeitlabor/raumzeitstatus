@@ -18,7 +18,7 @@ if (isset($_POST['set'])) {
 	<link rel="apple-touch-icon" href="rzl.png" />
 </head>
 <body style="min-height: 420px;" onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);">
-	<span style="text-align: center;"><img width="150px" style="display: block; margin-left: auto; margin-right: auto;" src="status.php" />
+	<span style="text-align: center;"><img width="128px" style="display: block; margin-left: auto; margin-right: auto;" src="status.php" />
 	<form action="mobile.php" method="post">
 		<?php
 			$roomStatus = (int)file_get_contents('room');
