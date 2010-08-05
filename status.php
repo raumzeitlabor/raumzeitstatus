@@ -2,8 +2,8 @@
 
 header('Content-type: image/png');
 
-$roomStatus = (int)file_get_contents('room');
-
+//$roomStatus = (int)file_get_contents('room');
+$roomStatus = (int)file_get_contents('http://scytale.name/files/tmp/rzlstatus.txt');
 $bild = null;
 
 switch ($roomStatus) {
