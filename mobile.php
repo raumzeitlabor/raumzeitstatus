@@ -9,8 +9,8 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
 	<link rel="apple-touch-icon" href="rzl.png" />
 </head>
-<body style="min-height: 420px;" onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);">
-<span style="text-align: center;">
+<body style="min-height: 420px; text-align: center" onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);">
+<span style="text-align: center">
 	<?php
 $roomStatus = file_get_contents('http://scytale.name/files/tmp/rzlstatus.txt');
 switch ($roomStatus) {
