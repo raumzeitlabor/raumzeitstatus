@@ -16,5 +16,6 @@ default:
 	break;
 }
 
-header("Location: $bild");
+header("Content-Type: image/png");
+readfile($bild);
 ?>
