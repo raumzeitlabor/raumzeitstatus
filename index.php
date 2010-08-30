@@ -19,7 +19,7 @@ body {
 <h1>Aktueller Status</h1>
 <div style="text-align: center">
 <?php
-$roomStatus = trim(file_get_contents('http://scytale.name/files/tmp/rzlstatus.txt'));
+$roomStatus = trim(file_get_contents('http://status.raumzeitlabor.de/api/simple'));
 switch ($roomStatus) {
 case '1':
 	$bild = 'images/green.png';
