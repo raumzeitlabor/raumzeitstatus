@@ -12,7 +12,7 @@ header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 <body style="min-height: 420px; text-align: center" onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);">
 <span style="text-align: center">
 	<?php
-$roomStatus = trim(file_get_contents('http://status.raumzeitlabor.de/api/simple'));
+$roomStatus = trim(file_get_contents('/data/www/status.raumzeitlabor.de/htdocs/update/simple.txt'));
 switch ($roomStatus) {
 case '1':
 	$bild = 'images/green.png';
