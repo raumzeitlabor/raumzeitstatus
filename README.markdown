@@ -15,9 +15,12 @@ via WebDAV auf status.raumzeitlabor.de.
 ## Setup
 
 1. RRD-Datenbanken erstellen:
+
     rrdtool create status-tuer.rrd -s 60 DS:tuer:GAUGE:120:U:U RRA:LAST:0:1:10080
     rrdtool create status-geraete.rrd -s 60 DS:geraete:GAUGE:120:U:U RRA:LAST:0:1:10080
+
 2. MySQL-Datenbank einrichten:
+
     CREATE TABLE leases (
       `ip` varchar(39) NOT NULL,
       `mac` varchar(17) NOT NULL,
@@ -26,10 +29,12 @@ via WebDAV auf status.raumzeitlabor.de.
       `hostname` text,
        PRIMARY KEY  (`ip`)
      ) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
 3. davconfig.pm und sqlconfig.pm befüllen
 4. Etherrape anschließen
 5. raumstatus-meta.sh als Cronjob einrichten
 6. WebDAV einrichten:
+
     <Location /update/>
        Dav On
        AuthType Digest
@@ -39,6 +44,7 @@ via WebDAV auf status.raumzeitlabor.de.
        AuthUserFile /data/www/status.raumzeitlabor.de/conf/digest-update
        Require valid-user
     </Location>
+
 7. status-unreachable.pl als Cronjob einrichten
 
 ## Lizenz
