@@ -3,21 +3,43 @@
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
 ?>
+<!DOCTYPE html>
 <html>
 <head>
 <title>RaumZeitLabor: Status</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
 <link rel="alternate" type="application/rss+xml" title="RSS"
  href="http://identi.ca/api/statuses/user_timeline/191025.rss">
 <style type="text/css">
 body {
-	font-family: Verdana, sans-serif;
+	margin: 0px;
+	padding-left: 1em;
+	font-family: Trebuchet MS, Verdana, sans-serif;
+	width: 900px;
+}
+
+h1 {
+        margin-top: 0.25em;
+        font-size: 48px;
 }
 </style>
 </head>
 <body>
-<h1>Aktueller Status</h1>
-<div style="text-align: center">
+<div style="float: right; margin-right: 1em; text-align: center">
+<a href="http://twitter.com/RaumZeitStatus">
+<img src="twitter.png" width="43" height="43" border="0" alt="Follow on twitter">
+</a>
+<br>
+<a href="http://identi.ca/raumzeitstatus">
+<img src="identica.png" width="50" height="50" alt="RaumZeitStatus on identi.ca" border="0">
+</a>
+<br>
+<a href="http://github.com/raumzeitlabor/raumzeitstatus">
+<img src="github.png" width="100" height="45" alt="Sourcecode" border="0">
+</a>
+</div>
+<h1>Status des RaumZeitLabors</h1>
+
 <?php
 $roomStatus = trim(file_get_contents('/data/www/status.raumzeitlabor.de/htdocs/update/simple.txt'));
 switch ($roomStatus) {
@@ -35,43 +57,19 @@ default:
 	break;
 }
 
-echo '<img src="' . $bild . '" alt="Raumstatus"><br>';
-echo $status;
+echo '<img src="' . $bild . '" alt="Raumstatus" align="left" style="padding-right: 1em">';
 ?>
-</div>
+<h2>Aktueller Status</h2>
+<?php echo $status; ?>
 
-<h1>Infos</h1>
+<br style="clear: both">
 
-<p>
-Der aktuelle Status kann über http://www.raumzeitlabor.de (oben rechts), über
-die Webapp oder im IRC via <code>!!raum</code> abgerufen werden.
-</p>
+<h2>Geräte im Netz</h2>
+<img src="status-1week.png">
 
-<p>
-Der Raumstatus wird automatisch durch einen Schalter in der Tür gesetzt.
-</p>
+<h2>Stromverbrauch (Flukso)</h2>
+<img src="flukso/flukso.png">
 
-<h2>IRC</h2>
-
-<p>
-In den Räumen #oqlt und #raumzeitlabor (hackint) kann der Status via
-<code>!!raum</code> abgefragt werden.
-</p>
-
-<h2>Web 2.0</h2>
-
-<p>
-Der Status wird auch auf <a
-href="http://identi.ca/RaumZeitStatus">Identi.ca</a> und auf <a
-href="http://twitter.com/raumzeitstatus">Twitter</a> veröffentlicht.
-</p>
-
-<h2>RSS</h2>
-<p>
-Identi.ca hat einen öffentlichen RSS-Feed über welchen der Status auch
-ohne Identi.ca Account abgefragt werden kann. Den Feed gibts unter 
-<a href="http://identi.ca/api/statuses/user_timeline/191025.rss">http://identi.ca/api/statuses/user_timeline/191025.rss</a>
-</p>
 
 </body>
 </html>
