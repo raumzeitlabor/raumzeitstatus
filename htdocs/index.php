@@ -22,20 +22,24 @@ h1 {
         margin-top: 0.25em;
         font-size: 48px;
 }
+
+img {
+	border: 0;
+}
 </style>
 </head>
 <body>
 <div style="float: right; margin-right: 1em; text-align: center">
 <a href="http://twitter.com/RaumZeitStatus">
-<img src="twitter.png" width="43" height="43" border="0" alt="Follow on twitter">
+<img src="twitter.png" width="43" height="43" alt="Follow on twitter">
 </a>
 <br>
 <a href="http://identi.ca/raumzeitstatus">
-<img src="identica.png" width="50" height="50" alt="RaumZeitStatus on identi.ca" border="0">
+<img src="identica.png" width="50" height="50" alt="RaumZeitStatus on identi.ca">
 </a>
 <br>
 <a href="http://github.com/raumzeitlabor/raumzeitstatus">
-<img src="github.png" width="100" height="45" alt="Sourcecode" border="0">
+<img src="github.png" width="100" height="45" alt="Sourcecode">
 </a>
 </div>
 <h1>Status des RaumZeitLabors</h1>
@@ -57,7 +61,7 @@ default:
 	break;
 }
 
-echo '<img src="' . $bild . '" alt="Raumstatus" align="left" style="padding-right: 1em">';
+echo '<img src="' . $bild . '" alt="Raumstatus" style="float: left; padding-right: 1em">';
 ?>
 <h2>Aktueller Status</h2>
 <?php echo $status; ?>
