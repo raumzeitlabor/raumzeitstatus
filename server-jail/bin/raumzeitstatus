@@ -1,0 +1,26 @@
+#!/usr/bin/env perl
+# vim:ts=4:sw=4:expandtab
+# use plackup -Ilib --port 8000 bin/raumzeitstatus
+
+use strict;
+use warnings;
+use RaumZeitStatus;
+use Plack::Builder;
+
+my $app = RaumZeitStatus->webapp;
+
+builder {
+    # require authorization for /api/update
+    enable_if
+        { $_[0]{PATH_INFO} =~ m,/api/update, }
+        'Plack::Middleware::Auth::Basic',
+        authenticator => \&check_pw;
+
+    $app;
+};
+
+sub check_pw {
+    my ($user, $pass) = @_;
+
+    return ($user eq 'foo' && $pass eq 'bar');
+}

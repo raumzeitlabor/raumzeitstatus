@@ -1,0 +1,6 @@
+Dies ist die Software, welche auf dem Jail „im Internet“ läuft und den Status
+entgegennimmt bzw. zur Verfügung stellt.
+
+Dependencies:
+Tatsumaki
+MooseX::Singleton
