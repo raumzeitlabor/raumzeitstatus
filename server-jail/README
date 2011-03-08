@@ -4,3 +4,39 @@ entgegennimmt bzw. zur Verfügung stellt.
 Dependencies:
 Tatsumaki
 MooseX::Singleton
+JSON::XS
+
+Deployment:
+daemon -u rzl -p /var/run/raumzeitstatus.pid plackup -Ilib --port 5000 bin/raumzeitstatus
+
+example rc.d-script:
+
+#!/bin/sh
+#
+# RaumZeitStatus rc.d script
+#
+
+# PROVIDE: raumzeitstatus
+# REQUIRE:
+# KEYWORD:
+
+. /etc/rc.subr
+
+name=raumzeitstatus
+rcvar=`set_rcvar`
+start_cmd="raumzeitstatus_start"
+pidfile=/var/run/rzl/${name}.pid
+logfile=/var/log/${name}.log
+
+user=rzl
+
+command="/usr/local/bin/plackup"
+command_args="-I/home/rzl/server-jail/lib --port 5000 --daemonize /home/rzl/server-jail/bin/raumzeitstatus"
+
+load_rc_config $name
+
+raumzeitstatus_start() {
+	/usr/sbin/daemon -p ${pidfile} -u ${user} ${command} ${command_args} >> ${logfile} 2>&1
+}
+
+run_rc_command "$1"
