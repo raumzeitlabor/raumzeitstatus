@@ -3,56 +3,54 @@
 
 use strict;
 use warnings;
+use lib qw(/home/rzl/ae-http-stream/);
 use AnyEvent;
+use AnyEvent::HTTP::Stream;
 use AnyEvent::IRC::Client;
 use IO::All;
+use JSON::XS;
+use Data::Dumper;
 
 my $server = "irc.hackint.net";
 my $port = 6667;
 my $nick = "RaumZeitStatus";
 my @channels = qw(#raumzeitlabor);
+my $current_status = '';
+my $conn = undef;
 
-sub get_status {
-    my $status = io('/data/www/status.raumzeitlabor.de/htdocs/update/simple.txt')->slurp;
-    chomp($status);
+my $stream = AnyEvent::HTTP::Stream->new(
+    url => 'http://status.raumzeitlabor.de:5000/api/stream/full.json',
+    on_data => sub {
+        my ($data) = @_;
+
+        print "data: " . Dumper($data) . "\n";
+	my $pkt = decode_json($data);
+	my $status = $pkt->{status};
+my $old_status = $current_status;
     if ($status eq '?') {
-        return 'Kann nicht ermittelt werden';
+        $current_status = 'Kann nicht ermittelt werden';
     } elsif ($status eq '1') {
-        return 'Offen';
+        $current_status = 'Offen';
     } elsif ($status eq '0') {
-        return 'Geschlossen';
+        $current_status = 'Geschlossen';
     } else {
-        return "Interner Fehler ($status)";
+        $current_status = "Interner Fehler ($status)";
     }
+if ($old_status ne $current_status) {
+	if (defined($conn)) {
+            for my $channel (@channels) {
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Neuer Status: $current_status"));
+            }
+	}
 }
+},
+);
 
 while (1) {
     print "Connecting...\n";
     my $old_status = "";
     my $c = AnyEvent->condvar;
-    my $conn = AnyEvent::IRC::Client->new;
-    my $w = AnyEvent->timer(
-        after => 30.0,
-        interval => 30.0,
-        cb => sub {
-            my $new_status = get_status();
-            return if $new_status eq $old_status;
-
-            # Skip the first update
-            if ($old_status eq "") {
-                $old_status = $new_status;
-                return;
-            }
-
-            # Announce new status
-            $old_status = $new_status;
-
-            for my $channel (@channels) {
-                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Neuer Status: $new_status"));
-            }
-
-        }
-    );
+    $conn = AnyEvent::IRC::Client->new;
 
     $conn->reg_cb(
         registered => sub {
@@ -71,7 +69,7 @@ while (1) {
                 $text =~ /^!!status/ or
                 $text =~ /^!raum/ or
                 $text =~ /^!status/) {
-                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: " . get_status()));
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
             }
         });
 
