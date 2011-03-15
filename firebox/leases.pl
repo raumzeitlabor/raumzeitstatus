@@ -12,7 +12,9 @@ use IO::All;
 use Fcntl qw (:flock);
 use JSON::XS;
 use RRDTool::OO;
+use MIME::Base64;
 use AnyEvent;
+use AnyEvent::HTTP;
 use AnyEvent::FastPing;
 use IO::Socket;
 
@@ -80,13 +82,22 @@ my $rrd = RRDTool::OO->new(file => "status-geraete.rrd");
 my $r = @reachable;
 $rrd->update(values => { 'geraete' => $r  } );
 
-open LOCKFILE, "<full.json" or die "Cannot open full.json";
-flock(LOCKFILE, LOCK_EX);
-my $file = io('full.json');
-my $json = decode_json($file->slurp);
-$json->{details}->{geraete} = $r;
-encode_json($json) > $file;
-close LOCKFILE or die "Cannot close full.json";
+my $username = "foo";
+my $password = "bar";
+my $auth = "Basic " . MIME::Base64::encode("$username:$password", '');
+$done = AnyEvent->condvar;
+http_post 'http://status.raumzeitlabor.de/new/update',
+	  encode_json({ details => { geraete => $r }}),
+	  headers => {
+		  Authorization => $auth,
+	  },
+	  sub {
+		my ($data, $headers) = @_;
+		say "reply from server: " . Dumper($data);
+		$done->broadcast;
+	  };
+$done->wait;
+
 
 exit 1 unless defined($db);
 $db->begin_work;
