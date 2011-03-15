@@ -1,8 +1,9 @@
 #!/bin/sh
 
 # Informationen sammeln
-/root/tuerstatus.pl
 /root/leases.pl
+
+/root/npm-status.pl
 
 # TODO: Informationen aufbereiten
 
