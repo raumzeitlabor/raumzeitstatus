@@ -86,7 +86,7 @@ my $username = "foo";
 my $password = "bar";
 my $auth = "Basic " . MIME::Base64::encode("$username:$password", '');
 $done = AnyEvent->condvar;
-http_post 'http://status.raumzeitlabor.de/new/update',
+http_post 'http://status.raumzeitlabor.de/api/update',
 	  encode_json({ details => { geraete => $r }}),
 	  headers => {
 		  Authorization => $auth,

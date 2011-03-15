@@ -56,7 +56,7 @@ sub new_status {
 	my $username = "foo";
 	my $password = "bar";
 	my $auth = "Basic " . MIME::Base64::encode("$username:$password", '');
-	http_post 'http://status.raumzeitlabor.de/new/update',
+	http_post 'http://status.raumzeitlabor.de/api/update',
 		  encode_json({ status => $output }),
 		  headers => {
 			  Authorization => $auth,
