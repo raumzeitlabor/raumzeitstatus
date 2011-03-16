@@ -25,6 +25,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 import android.net.Uri;
+import android.content.SharedPreferences;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -36,13 +37,14 @@ public class StatusProvider extends AppWidgetProvider {
     private static final String TAG = "rzlstatus";
     private static final String URI_SCHEME = "rzlstatus";
 
-    private static Intent updateIntentForWidget(int appWidgetId) {
+    public static Intent updateIntentForWidget(int appWidgetId) {
         Intent i = new Intent();
         i.setAction("org.raumzeitlabor.status.UPDATE");
         i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
                  String.valueOf(appWidgetId)));
         return i;
     }
+
     private static Intent clickIntentForWidget(int appWidgetId) {
         Intent i = new Intent();
         i.setAction("org.raumzeitlabor.status.CLICK");
@@ -51,9 +53,8 @@ public class StatusProvider extends AppWidgetProvider {
         return i;
     }
 
-
     @Override
-    public void onDeleted (Context context, int[] appWidgetIds) {
+    public void onDeleted(Context context, int[] appWidgetIds) {
         Log.d(TAG, "onDeleted");
         AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         for (int appWidgetId : appWidgetIds) {
@@ -70,6 +71,7 @@ public class StatusProvider extends AppWidgetProvider {
 
         AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         for (int appWidgetId : appWidgetIds) {
+            SharedPreferences prefs = context.getSharedPreferences("config", Context.MODE_PRIVATE);
             Log.d(TAG, "Setting up alarm for widget id " + appWidgetId);
 
             Intent i = updateIntentForWidget(appWidgetId);
@@ -79,7 +81,6 @@ public class StatusProvider extends AppWidgetProvider {
                 0,
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                 PendingIntent.getBroadcast(context, 0, i, 0));
-
         }
     }
 
@@ -112,6 +113,13 @@ public class StatusProvider extends AppWidgetProvider {
             int widgetId = Integer.valueOf(lastSegment);
             Log.d(TAG, "CLICK for id = " + lastSegment);
 
+            Log.d(TAG, "bounds = " + intent.getSourceBounds());
+            Intent i = new Intent(context, MenuPopup.class);
+            i.putExtra("bounds", intent.getSourceBounds());
+            i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(i);
+/*
             RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
             update.setTextViewText(R.id.lastupdate, "...");
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
@@ -121,6 +129,7 @@ public class StatusProvider extends AppWidgetProvider {
             task.setContext(context);
             task.setWidgetId(widgetId);
             task.execute((Void)null);
+            */
         } else {
             super.onReceive(context, intent);
         }
