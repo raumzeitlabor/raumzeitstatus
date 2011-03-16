@@ -43,6 +43,14 @@ public class StatusProvider extends AppWidgetProvider {
                  String.valueOf(appWidgetId)));
         return i;
     }
+    private static Intent clickIntentForWidget(int appWidgetId) {
+        Intent i = new Intent();
+        i.setAction("org.raumzeitlabor.status.CLICK");
+        i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
+                 String.valueOf(appWidgetId)));
+        return i;
+    }
+
 
     @Override
     public void onDeleted (Context context, int[] appWidgetIds) {
@@ -68,9 +76,10 @@ public class StatusProvider extends AppWidgetProvider {
             /* TODO: let the user configure the interval */
             amgr.setInexactRepeating(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime(),
+                0,
                 AlarmManager.INTERVAL_FIFTEEN_MINUTES,
                 PendingIntent.getBroadcast(context, 0, i, 0));
+
         }
     }
 
@@ -96,6 +105,21 @@ public class StatusProvider extends AppWidgetProvider {
             UpdateWidgetTask task = new UpdateWidgetTask();
             task.setContext(context);
             task.setWidgetId(Integer.valueOf(lastSegment));
+            task.execute((Void)null);
+        } else if ("org.raumzeitlabor.status.CLICK".equals(action)) {
+            Uri uri = intent.getData();
+            String lastSegment = uri.getLastPathSegment();
+            int widgetId = Integer.valueOf(lastSegment);
+            Log.d(TAG, "CLICK for id = " + lastSegment);
+
+            RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
+            update.setTextViewText(R.id.lastupdate, "...");
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            manager.updateAppWidget(widgetId, update);
+
+            UpdateWidgetTask task = new UpdateWidgetTask();
+            task.setContext(context);
+            task.setWidgetId(widgetId);
             task.execute((Void)null);
         } else {
             super.onReceive(context, intent);
@@ -151,11 +175,17 @@ public class StatusProvider extends AppWidgetProvider {
                 default:  resource = R.drawable.unklar;
             }
 
+            String time = new SimpleDateFormat("HH:mm").format(new Date());
+            Intent i = clickIntentForWidget(widgetId);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
+
             Log.d(TAG, "Pushing update");
             RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
             update.setImageViewResource(R.id.statusimage, resource);
-            String time = new SimpleDateFormat("HH:mm").format(new Date());
             update.setTextViewText(R.id.lastupdate, time);
+            update.setOnClickPendingIntent(R.id.framelayout, pendingIntent);
+            update.setOnClickPendingIntent(R.id.statusimage, pendingIntent);
+            update.setOnClickPendingIntent(R.id.lastupdate, pendingIntent);
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
             manager.updateAppWidget(widgetId, update);
         }
