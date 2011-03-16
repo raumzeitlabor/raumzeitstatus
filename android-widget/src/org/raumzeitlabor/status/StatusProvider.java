@@ -56,6 +56,11 @@ public class StatusProvider extends AppWidgetProvider {
             Intent i = intentForWidget(appWidgetId, ".UPDATE");
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
             amgr.cancel(pi);
+            Log.d(TAG, "Deleting SharedPreferences for widget id " + appWidgetId);
+            SharedPreferences prefs = context.getSharedPreferences("widget_" + appWidgetId, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.clear();
+            editor.commit();
         }
     }
 
