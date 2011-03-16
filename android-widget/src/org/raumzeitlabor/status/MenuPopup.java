@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.graphics.Rect;
 
 public class MenuPopup extends Activity {
+    private static final String TAG = "rzlstatus";
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
     @Override
@@ -47,7 +48,7 @@ public class MenuPopup extends Activity {
         setContentView(R.layout.quickaction);
 
         Rect bounds = (Rect)extras.get("bounds");
-        Log.d("yo", "start with bounds = " + bounds);
+        Log.d(TAG, "start with bounds = " + bounds);
 
         WindowManager.LayoutParams p = (WindowManager.LayoutParams)getWindow().getAttributes();
         p.gravity = Gravity.LEFT | Gravity.TOP;
@@ -73,7 +74,7 @@ public class MenuPopup extends Activity {
         container.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = StatusProvider.updateIntentForWidget(mAppWidgetId);
+                Intent i = StatusProvider.intentForWidget(mAppWidgetId, ".UPDATE");
                 sendBroadcast(i);
                 finish();
             }

@@ -45,7 +45,7 @@ public class Configure extends PreferenceActivity {
 
         Log.d(TAG, "onPause, updating widget");
 
-        Intent i = StatusProvider.reloadIntentForWidget(mAppWidgetId);
+        Intent i = StatusProvider.intentForWidget(mAppWidgetId, ".RELOAD");
         sendBroadcast(i);
     }
 }

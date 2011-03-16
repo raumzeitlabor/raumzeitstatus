@@ -36,27 +36,12 @@ import org.raumzeitlabor.status.AndroidHttpClient;
 public class StatusProvider extends AppWidgetProvider {
     private static final String TAG = "rzlstatus";
     private static final String URI_SCHEME = "rzlstatus";
+    private static final String INTENT_PREFIX = "org.raumzeitlabor.status";
     private boolean firstUpdate = true;
 
-    public static Intent updateIntentForWidget(int appWidgetId) {
+    public static Intent intentForWidget(int appWidgetId, String specificIntent) {
         Intent i = new Intent();
-        i.setAction("org.raumzeitlabor.status.UPDATE");
-        i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
-                 String.valueOf(appWidgetId)));
-        return i;
-    }
-
-    public static Intent reloadIntentForWidget(int appWidgetId) {
-        Intent i = new Intent();
-        i.setAction("org.raumzeitlabor.status.RELOAD");
-        i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
-                 String.valueOf(appWidgetId)));
-        return i;
-    }
-
-    private static Intent clickIntentForWidget(int appWidgetId) {
-        Intent i = new Intent();
-        i.setAction("org.raumzeitlabor.status.CLICK");
+        i.setAction(INTENT_PREFIX + specificIntent);
         i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
                  String.valueOf(appWidgetId)));
         return i;
@@ -68,7 +53,7 @@ public class StatusProvider extends AppWidgetProvider {
         AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         for (int appWidgetId : appWidgetIds) {
             Log.d(TAG, "Cancelling alarm for widget id " + appWidgetId);
-            Intent i = updateIntentForWidget(appWidgetId);
+            Intent i = intentForWidget(appWidgetId, ".UPDATE");
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
             amgr.cancel(pi);
         }
@@ -83,7 +68,7 @@ public class StatusProvider extends AppWidgetProvider {
             /* To make clicking work before the first answer from server, we
              * perform an update of the RemoteView on the first call of onUpdate() */
             if (firstUpdate) {
-                Intent i = clickIntentForWidget(appWidgetId);
+                Intent i = intentForWidget(appWidgetId, ".CLICK");
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
                 RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
                 update.setTextViewText(R.id.lastupdate, "--:--");
@@ -106,7 +91,7 @@ public class StatusProvider extends AppWidgetProvider {
         SharedPreferences prefs = context.getSharedPreferences("widget_" + appWidgetId, Context.MODE_PRIVATE);
         Log.d(TAG, "Setting up alarm for widget id " + appWidgetId);
 
-        Intent i = updateIntentForWidget(appWidgetId);
+        Intent i = intentForWidget(appWidgetId, ".UPDATE");
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
         amgr.cancel(pi);
         if (prefs.getBoolean("autoRefresh", true)) {
@@ -138,47 +123,35 @@ public class StatusProvider extends AppWidgetProvider {
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 this.onDeleted(context, new int[] { appWidgetId });
             }
-        } else if ("org.raumzeitlabor.status.RELOAD".equals(action)) {
-            Log.d(TAG, "Should reload");
-
+        } else if (action.startsWith(INTENT_PREFIX)) {
+            /* Extract the widgetId, which is the last part of the URI */
             Uri uri = intent.getData();
             String lastSegment = uri.getLastPathSegment();
             int widgetId = Integer.valueOf(lastSegment);
-            Log.d(TAG, "RELOAD for id = " + widgetId);
+            Log.d(TAG, "id = " + widgetId);
 
-            initTimer(context, widgetId, null);
-        } else if ("org.raumzeitlabor.status.UPDATE".equals(action)) {
-            Uri uri = intent.getData();
-            String lastSegment = uri.getLastPathSegment();
-            Log.d(TAG, "UPDATE alarm for id = " + lastSegment);
+            if (action.equals(INTENT_PREFIX + ".RELOAD")) {
+                initTimer(context, widgetId, null);
+                return;
+            }
 
-            UpdateWidgetTask task = new UpdateWidgetTask();
-            task.setContext(context);
-            task.setWidgetId(Integer.valueOf(lastSegment));
-            task.execute((Void)null);
-        } else if ("org.raumzeitlabor.status.CLICK".equals(action)) {
-            Uri uri = intent.getData();
-            String lastSegment = uri.getLastPathSegment();
-            int widgetId = Integer.valueOf(lastSegment);
-            Log.d(TAG, "CLICK for id = " + lastSegment);
+            if (action.equals(INTENT_PREFIX + ".UPDATE")) {
+                UpdateWidgetTask task = new UpdateWidgetTask();
+                task.setContext(context);
+                task.setWidgetId(widgetId);
+                task.execute((Void)null);
+                return;
+            }
 
-            Log.d(TAG, "bounds = " + intent.getSourceBounds());
-            Intent i = new Intent(context, MenuPopup.class);
-            i.putExtra("bounds", intent.getSourceBounds());
-            i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(i);
-/*
-            RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
-            update.setTextViewText(R.id.lastupdate, "...");
-            AppWidgetManager manager = AppWidgetManager.getInstance(context);
-            manager.updateAppWidget(widgetId, update);
-
-            UpdateWidgetTask task = new UpdateWidgetTask();
-            task.setContext(context);
-            task.setWidgetId(widgetId);
-            task.execute((Void)null);
-            */
+            if (action.equals(INTENT_PREFIX + ".CLICK")) {
+                Log.d(TAG, "bounds = " + intent.getSourceBounds());
+                Intent i = new Intent(context, MenuPopup.class);
+                i.putExtra("bounds", intent.getSourceBounds());
+                i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(i);
+                return;
+            }
         } else {
             super.onReceive(context, intent);
         }
@@ -234,7 +207,7 @@ public class StatusProvider extends AppWidgetProvider {
             }
 
             String time = new SimpleDateFormat("HH:mm").format(new Date());
-            Intent i = clickIntentForWidget(widgetId);
+            Intent i = intentForWidget(widgetId, ".CLICK");
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
 
             Log.d(TAG, "Pushing update");
