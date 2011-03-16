@@ -16,6 +16,13 @@
 		<intent-filter>
 			<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
 		</intent-filter>
+		<intent-filter>
+			<action android:name="org.raumzeitlabor.status.UPDATE" />
+			<data android:scheme="rzlstatus" />
+		</intent-filter>
+		<intent-filter>
+			<action android:name="org.raumzeitlabor.status.CLICK" />
+		</intent-filter>
 		<meta-data android:name="android.appwidget.provider"
 			android:resource="@xml/statusprovider" />
 	</receiver>
