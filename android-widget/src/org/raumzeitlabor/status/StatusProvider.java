@@ -179,6 +179,8 @@ public class StatusProvider extends AppWidgetProvider {
             Log.d(TAG, "Getting update from status.raumzeitlabor.de");
 
             HttpGet request = new HttpGet("http://status.raumzeitlabor.de/api/simple");
+            request.addHeader("Pragma", "no-cache");
+            request.addHeader("Cache-Control", "no-cache");
             AndroidHttpClient client = AndroidHttpClient.newInstance("");
             try {
                 HttpResponse response = client.execute(request);
