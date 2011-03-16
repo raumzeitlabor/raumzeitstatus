@@ -36,6 +36,7 @@ import org.raumzeitlabor.status.AndroidHttpClient;
 public class StatusProvider extends AppWidgetProvider {
     private static final String TAG = "rzlstatus";
     private static final String URI_SCHEME = "rzlstatus";
+    private boolean firstUpdate = true;
 
     public static Intent updateIntentForWidget(int appWidgetId) {
         Intent i = new Intent();
@@ -79,8 +80,23 @@ public class StatusProvider extends AppWidgetProvider {
 
         AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         for (int appWidgetId : appWidgetIds) {
+            /* To make clicking work before the first answer from server, we
+             * perform an update of the RemoteView on the first call of onUpdate() */
+            if (firstUpdate) {
+                Intent i = clickIntentForWidget(appWidgetId);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
+                RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
+                update.setTextViewText(R.id.lastupdate, "--:--");
+                update.setOnClickPendingIntent(R.id.framelayout, pendingIntent);
+                update.setOnClickPendingIntent(R.id.statusimage, pendingIntent);
+                update.setOnClickPendingIntent(R.id.lastupdate, pendingIntent);
+                manager.updateAppWidget(appWidgetId, update);
+            }
             initTimer(context, appWidgetId, amgr);
         }
+
+        if (firstUpdate)
+            firstUpdate = false;
     }
 
     private void initTimer(Context context, int appWidgetId, AlarmManager amgr) {
