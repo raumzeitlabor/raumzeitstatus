@@ -31,6 +31,10 @@
 			<action android:name="org.raumzeitlabor.status.CLICK" />
 			<data android:scheme="rzlstatus" />
 		</intent-filter>
+		<intent-filter>
+			<action android:name="org.raumzeitlabor.status.RELOAD" />
+			<data android:scheme="rzlstatus" />
+		</intent-filter>
 		<meta-data android:name="android.appwidget.provider"
 			android:resource="@xml/statusprovider" />
 	</receiver>

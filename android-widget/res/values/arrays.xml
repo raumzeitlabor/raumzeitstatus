@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="intervalTitles">
+	<item>15 minutes</item>
+	<item>30 minutes</item>
+	<item>one hour</item>
+	<item>12 hours</item>
+	<item>one day</item>
+</string-array>
+<string-array name="intervalValues">
+	<item>900000</item>
+	<item>1800000</item>
+	<item>3600000</item>
+	<item>43200000</item>
+	<item>86400000</item>
+</string-array>
+</resources>

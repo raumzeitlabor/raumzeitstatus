@@ -45,6 +45,14 @@ public class StatusProvider extends AppWidgetProvider {
         return i;
     }
 
+    public static Intent reloadIntentForWidget(int appWidgetId) {
+        Intent i = new Intent();
+        i.setAction("org.raumzeitlabor.status.RELOAD");
+        i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
+                 String.valueOf(appWidgetId)));
+        return i;
+    }
+
     private static Intent clickIntentForWidget(int appWidgetId) {
         Intent i = new Intent();
         i.setAction("org.raumzeitlabor.status.CLICK");
@@ -71,16 +79,32 @@ public class StatusProvider extends AppWidgetProvider {
 
         AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         for (int appWidgetId : appWidgetIds) {
-            SharedPreferences prefs = context.getSharedPreferences("config", Context.MODE_PRIVATE);
-            Log.d(TAG, "Setting up alarm for widget id " + appWidgetId);
+            initTimer(context, appWidgetId, amgr);
+        }
+    }
 
-            Intent i = updateIntentForWidget(appWidgetId);
-            /* TODO: let the user configure the interval */
+    private void initTimer(Context context, int appWidgetId, AlarmManager amgr) {
+        if (amgr == null) {
+            amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        }
+        SharedPreferences prefs = context.getSharedPreferences("widget_" + appWidgetId, Context.MODE_PRIVATE);
+        Log.d(TAG, "Setting up alarm for widget id " + appWidgetId);
+
+        Intent i = updateIntentForWidget(appWidgetId);
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
+        amgr.cancel(pi);
+        if (prefs.getBoolean("autoRefresh", true)) {
+            String intervalStr = prefs.getString("refreshInterval", "900000");
+            int interval = Integer.valueOf(intervalStr);
+            Log.d(TAG, "interval = " + interval);
             amgr.setInexactRepeating(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                0,
-                AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                PendingIntent.getBroadcast(context, 0, i, 0));
+                SystemClock.elapsedRealtime() + interval,
+                interval,
+                pi);
+            context.sendBroadcast(i);
+        } else {
+            Log.d(TAG, "autoRefresh disabled");
         }
     }
 
@@ -98,6 +122,15 @@ public class StatusProvider extends AppWidgetProvider {
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 this.onDeleted(context, new int[] { appWidgetId });
             }
+        } else if ("org.raumzeitlabor.status.RELOAD".equals(action)) {
+            Log.d(TAG, "Should reload");
+
+            Uri uri = intent.getData();
+            String lastSegment = uri.getLastPathSegment();
+            int widgetId = Integer.valueOf(lastSegment);
+            Log.d(TAG, "RELOAD for id = " + widgetId);
+
+            initTimer(context, widgetId, null);
         } else if ("org.raumzeitlabor.status.UPDATE".equals(action)) {
             Uri uri = intent.getData();
             String lastSegment = uri.getLastPathSegment();
