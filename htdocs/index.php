@@ -45,7 +45,7 @@ img {
 <h1>Status des RaumZeitLabors</h1>
 
 <?php
-$roomStatus = trim(file_get_contents('/data/www/status.raumzeitlabor.de/htdocs/update/simple.txt'));
+$roomStatus = trim(file_get_contents('http://status.raumzeitlabor.de/api/simple'));
 switch ($roomStatus) {
 case '1':
 	$bild = 'images/green.png';
