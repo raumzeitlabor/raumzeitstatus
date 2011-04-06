@@ -196,7 +196,7 @@ public class StatusProvider extends AppWidgetProvider {
                 return (char)firstByte;
             } catch (Exception e) {
                 e.printStackTrace();
-                return '?';
+                return '!';
             } finally {
                 client.close();
             }
@@ -226,6 +226,14 @@ public class StatusProvider extends AppWidgetProvider {
             update.setOnClickPendingIntent(R.id.lastupdate, pendingIntent);
             AppWidgetManager manager = AppWidgetManager.getInstance(context);
             manager.updateAppWidget(widgetId, update);
+
+            /* Tell the WantConnectivityService that we want an update as soon
+             * as there is network connectivity */
+            if (result == '!') {
+                Intent si = new Intent(context, WantConnectivityService.class);
+                si.putExtra("widgetId", widgetId);
+                context.startService(si);
+            }
         }
     }
 
