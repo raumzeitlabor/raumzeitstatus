@@ -13,8 +13,8 @@
 	<ImageView
 		android:id="@+id/icon" 
 		android:scaleType="centerInside"
-		android:layout_width="45px" 
-		android:layout_height="45px"/>
+		android:layout_width="30dip"
+		android:layout_height="30dip"/>
 
 	<TextView 
 		android:id="@+id/title"
