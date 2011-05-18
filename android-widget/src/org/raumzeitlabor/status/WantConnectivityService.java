@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Handler;
 import android.util.Log;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -61,6 +62,8 @@ public class WantConnectivityService extends Service {
     }
 
     public class NetworkChangeReceiver extends BroadcastReceiver {
+        private final Handler mHandler = new Handler();
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Broadcast! action = " + intent.getAction());
@@ -79,12 +82,17 @@ public class WantConnectivityService extends Service {
                 return;
             }
 
-            for (Integer id : widgetIds) {
-                Log.d(TAG, "Should update widget with id " + id);
-                sendBroadcast(StatusProvider.intentForWidget(id, ".UPDATE"));
-            }
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    for (Integer id : widgetIds) {
+                        Log.d(TAG, "Should update widget with id " + id);
+                        sendBroadcast(StatusProvider.intentForWidget(id, ".UPDATE"));
+                    }
 
-            WantConnectivityService.this.stopSelf();
+                    WantConnectivityService.this.stopSelf();
+                }
+            }, 10000);
         }
     }
 }
