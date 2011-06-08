@@ -4,73 +4,54 @@
 use strict;
 use warnings;
 use Data::Dumper;
-use IO::All;
-use File::stat;
 use DateTime;
 use Net::Twitter;
 use AnyEvent;
+use lib qw(/home/rzl/ae-http-stream/);
+use AnyEvent::HTTP::Stream;
+use JSON::XS;
 
-sub get_status {
-    my $file = '/data/www/status.raumzeitlabor.de/htdocs/update/simple.txt';
-    my $st = stat($file) or die "No $file: $!";
-    my $dt = DateTime->from_epoch(epoch => $st->mtime);
-    $dt->set_time_zone('Europe/Berlin');
-    my $status = io($file)->slurp;
-    my $res;
+my $current_status = undef;
 
-    chomp($status);
-    if ($status eq '?') {
-        $res = 'Kann nicht ermittelt werden';
-    } elsif ($status eq '1') {
-        $res = 'Offen';
-    } elsif ($status eq '0') {
-        $res = 'Geschlossen';
-    } else {
-        $res = "Interner Fehler ($status)";
-    }
-
-    return "$res (Stand: " . $dt->strftime("%Y-%m-%d %H:%M:%S %z") . ")";
-}
-
-my $nt = Net::Twitter->new(
+my $twitter = Net::Twitter->new(
     traits   => [qw/OAuth API::REST/],
     consumer_key    => 'REGISTER-APP-AND-FILL-IN',
     consumer_secret => 'REGISTER-APP-AND-FILL-IN',
-
     access_token => 'AUTHORIZE-AND-FILL-IN',
     access_token_secret => 'AUTHORIZE-AND-FILL-IN',
 );
 
-my $cv = AnyEvent->condvar;
-my $old_status = "";
+my $stream = AnyEvent::HTTP::Stream->new(
+    url => 'http://status.raumzeitlabor.de:5000/api/stream/full.json',
+    on_data => sub {
+        my ($data) = @_;
 
-my $w = AnyEvent->timer(
-    after => 30.0,
-    interval => 30.0,
-    cb => sub {
-        my $new_status = get_status();
-        my ($new_start) = ($new_status =~ /([^\(]+)/);
-        my ($old_start) = ($old_status =~ /([^\(]+)/);
-        return if defined($new_start) and
-                  defined($old_start) and
-                  ($new_start eq $old_start);
-
-        # Skip the first update
-        if ($old_status eq "") {
-            $old_status = $new_status;
-            return;
+        my $pkt = decode_json($data);
+        my $status = $pkt->{status};
+        my $old_status = $current_status;
+        if ($status eq '?') {
+            $current_status = 'Kann nicht ermittelt werden';
+        } elsif ($status eq '1') {
+            $current_status = 'Offen';
+        } elsif ($status eq '0') {
+            $current_status = 'Geschlossen';
+        } else {
+            $current_status = "Interner Fehler ($status)";
         }
 
-        # Announce new status
-        $old_status = $new_status;
- 
-        $nt->update({
-            status => 'Status: ' . get_status(),
+        return if $old_status eq $current_status;
+        print "Posting new status $current_status to twitter...\n";
+        my $dt = DateTime->now;
+        $dt->set_time_zone('Europe/Berlin');
+        my $time = $dt->strftime("%Y-%m-%d %H:%M:%S %z");
+        $twitter->update({
+            status => "Status: $current_status (Stand: $time)",
             lat => '49.507242',
             long => '8.499177',
             place_id => '8c2c7f5b87502184',
             display_coordinates => 1
         });
-    });
+    },
+);
 
-$cv->recv
+AE::cv->recv
