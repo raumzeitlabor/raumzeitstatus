@@ -14,6 +14,7 @@ sub get {
     my ($self) = @_;
 
     $self->response->content_type('text/plain');
+    $self->response->headers([ 'Access-Control-Allow-Origin' => '*' ]);
     $self->write($status->total_status);
     $self->finish;
 }

@@ -15,6 +15,7 @@ sub get {
     my ($self) = @_;
 
     $self->response->content_type('application/json');
+    $self->response->headers([ 'Access-Control-Allow-Origin' => '*' ]);
     $self->write($status->full_status);
     $self->finish;
 }
