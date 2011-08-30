@@ -8,20 +8,18 @@ use DBIx::Simple;
 use Data::Dumper;
 use Net::INET6Glue::INET_is_INET6;
 use IO::All;
-use Fcntl qw (:flock);
 use lib qw(.);
 use lib qw(ae-http-stream-lib);
-use Hausbus;
 use AnyEvent;
 use AnyEvent::HTTP;
 use sqlconfig;
-use JSON::XS;
 use MIME::Base64;
 
 use v5.10;
 
 use AnyEvent::HTTP::Stream;
 
+my $cv = AE::cv;
 my $stream = AnyEvent::HTTP::Stream->new(
 	url => 'http://localhost:8888/group/pinpad',
 	on_data => sub {
@@ -41,7 +39,12 @@ my $stream = AnyEvent::HTTP::Stream->new(
 		}
 		say "translates to code $statuscode";
 		new_status($statuscode);
-	});
+	},
+    on_error => sub {
+        my ($fatal, $message) = @_;
+        warn "Error fatal=$fatal, message=$message";
+        $cv->send;
+    });
 
 
 my $w = AnyEvent->timer(after => 1, interval => 60, cb => sub {
@@ -86,4 +89,4 @@ sub new_status {
 	#$db->commit;
 }
 
-AE::cv->recv
+$cv->recv
