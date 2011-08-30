@@ -45,7 +45,8 @@ my $stream = AnyEvent::HTTP::Stream->new(
 
 
 my $w = AnyEvent->timer(after => 1, interval => 60, cb => sub {
-	'{"payload":"status"}' > io('http://localhost:8888/send/pinpad');
+	my $post;
+	$post = http_post 'http://localhost:8888/send/pinpad', '{"payload":"status"}', sub { say "posted!"; undef $post; };
 });
 
 sub new_status {
