@@ -71,6 +71,9 @@ echo '<img src="' . $bild . '" alt="Raumstatus" style="float: left; padding-righ
 <h2>Geräte im Netz</h2>
 <img src="status-1week.png">
 
+<h2>Temperatur</h2>
+<img src="https://api.pachube.com/v2/feeds/42055/datastreams/temp1.png?width=702&height=250&colour=F15A24&detailed_grid=true&show_axis_labels=true&timezone=&duration=24hours">
+
 <h2>Stromverbrauch (Flukso)</h2>
 <img src="flukso/flukso.png">
 
