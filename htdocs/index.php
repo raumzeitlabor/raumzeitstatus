@@ -72,7 +72,7 @@ echo '<img src="' . $bild . '" alt="Raumstatus" style="float: left; padding-righ
 <img src="status-1week.png">
 
 <h2>Temperatur</h2>
-<img src="https://api.pachube.com/v2/feeds/42055/datastreams/temp1.png?width=881&height=340&colour=F15A24&detailed_grid=true&show_axis_labels=true&timezone=&duration=24hours">
+<img src="https://api.pachube.com/v2/feeds/42055/datastreams/Temperatur_Raum_Tafel.png?width=881&height=340&colour=F15A24&duration=24hours&detailed_grid=true&show_axis_labels=true&timezone=">
 
 <h2>Stromverbrauch</h2>
 <img src="http://api.pachube.com/v2/feeds/42055/datastreams/Strom_Leistung.png?width=866&height=300&colour=F15A24&duration=24hours&detailed_grid=true&show_axis_labels=true&timezone=">
