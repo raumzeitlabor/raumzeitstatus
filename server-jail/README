@@ -5,6 +5,7 @@ Dependencies:
 Tatsumaki
 MooseX::Singleton
 JSON::XS
+Plack
 
 Deployment:
 daemon -u rzl -p /var/run/raumzeitstatus.pid plackup -Ilib --port 5000 bin/raumzeitstatus
