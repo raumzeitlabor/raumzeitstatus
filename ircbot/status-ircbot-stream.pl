@@ -25,6 +25,7 @@ my $stream = AnyEvent::HTTP::Stream->new(
 
         print "data: " . Dumper($data) . "\n";
 	my $pkt = decode_json($data);
+    $pkt->{laboranten} = ["Der Kühlschrank"] unless (scalar @{$pkt->{laboranten});
 	my $status = $pkt->{status};
 my $old_status = $current_status;
     if ($status eq '?') {
@@ -71,7 +72,7 @@ while (1) {
                 $text =~ /^!status/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
             } elsif ($text =~ /^!!?weristda/) {
-                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", $pkt->{laboranten})));
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$pkt->{laboranten}})));
             }
         });
 
