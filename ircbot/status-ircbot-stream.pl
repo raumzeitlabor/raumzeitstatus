@@ -17,6 +17,8 @@ my $nick = "RaumZeitStatus";
 my @channels = qw(#raumzeitlabor);
 my $current_status = '';
 my $conn = undef;
+my $pkt = undef;
+my $laboranten;
 
 my $stream = AnyEvent::HTTP::Stream->new(
     url => 'http://status.raumzeitlabor.de:5000/api/stream/full.json',
@@ -24,9 +26,17 @@ my $stream = AnyEvent::HTTP::Stream->new(
         my ($data) = @_;
 
         print "data: " . Dumper($data) . "\n";
-	my $pkt = decode_json($data);
+
+    $pkt = decode_json($data);
+    if (defined $pkt && defined $pkt->{details} && defined $pkt->{details}->{laboranten}
+        && scalar @{$pkt->{details}->{laboranten}} == 0) {
+        $laboranten = ["Kühlschrank"];
+    } else {
+        $laboranten = $pkt->{details}->{laboranten};
+    }
+
 	my $status = $pkt->{status};
-my $old_status = $current_status;
+    my $old_status = $current_status;
     if ($status eq '?') {
         $current_status = 'Kann nicht ermittelt werden';
     } elsif ($status eq '1') {
@@ -36,13 +46,13 @@ my $old_status = $current_status;
     } else {
         $current_status = "Interner Fehler ($status)";
     }
-if ($old_status ne $current_status) {
-	if (defined($conn)) {
-            for my $channel (@channels) {
-                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Neuer Status: $current_status"));
-            }
-	}
-}
+    if ($old_status ne $current_status) {
+	    if (defined($conn)) {
+                for my $channel (@channels) {
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Neuer Status: $current_status"));
+                }
+	    }
+    }
 },
 );
 
@@ -70,6 +80,8 @@ while (1) {
                 $text =~ /^!raum/ or
                 $text =~ /^!status/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
+            } elsif ($text =~ /^!!?weristda/) {
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$laboranten})));
             }
         });
 
