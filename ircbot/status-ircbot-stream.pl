@@ -70,6 +70,8 @@ while (1) {
                 $text =~ /^!raum/ or
                 $text =~ /^!status/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
+            } elsif ($text =~ /^!!?weristda/) {
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", $pkt->{laboranten})));
             }
         });
 
