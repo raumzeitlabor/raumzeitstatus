@@ -25,6 +25,9 @@ sub post {
     if (exists $update->{details}->{geraete}) {
         $status->device_count($update->{details}->{geraete});
     }
+    if (exists $update->{details}->{laboranten}) {
+        $status->user($update->{details}->{laboranten});
+    }
 
     # publish the new status to the messagequeue if changed
     my $new_status = $status->full_status;
