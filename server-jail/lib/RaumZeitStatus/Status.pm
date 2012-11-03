@@ -24,6 +24,13 @@ has 'device_count' => (
     clearer => 'clear_device_count',
 );
 
+has 'user' => (
+    isa => 'ArrayRef',
+    is => 'rw',
+    predicate => 'user_available',
+    clearer => 'clear_user',
+);
+
 has '_timer' => (
     isa => 'Ref',
     is => 'rw',
@@ -68,6 +75,7 @@ sub full_status {
         details => {
             tuer => ($self->lockstate_available ? $self->door_unlocked : '?'),
             geraete => ($self->device_count_available ? $self->device_count : '?'),
+            laboranten => ($self->user_available ? $self->user : []),
         }
     );
 
@@ -75,7 +83,7 @@ sub full_status {
 }
 
 # TODO: npm
-#{"status":"1","details":{"tuer":"1","npm":{"port4":"0","port3":"0","port7":"0","port2":"1","port8":"0","port5":"0","port1":"1","port6":"0"},"geraete":8}}#                    
+#{"status":"1","details":{"tuer":"1","npm":{"port4":"0","port3":"0","port7":"0","port2":"1","port8":"0","port5":"0","port1":"1","port6":"0"},"geraete":8}}#
 
 
 __PACKAGE__->meta->make_immutable;

@@ -18,6 +18,7 @@ use AnyEvent::HTTP;
 use AnyEvent::FastPing;
 use IO::Socket;
 
+use Time::Piece;
 use DBIx::Simple;
 
 use Text::DHCPLeases;
@@ -82,12 +83,50 @@ my $rrd = RRDTool::OO->new(file => "status-geraete.rrd");
 my $r = @reachable;
 $rrd->update(values => { 'geraete' => $r  } );
 
+my @laboranten = ();
+if (defined $db) {
+    $db->begin_work;
+    $db->query('DELETE FROM leases');
+    print "done, inserting:\n";
+    for my $mac (keys %users) {
+        # TODO: handle multiple IPs
+        my @ips = $users{$mac}->ips;
+        $db->insert('leases', {
+            ip => $ips[0],
+            mac => $mac,
+            ipv4_reachable => $users{$mac}->ipv4_reachable,
+            ipv6_reachable => 0,
+            hostname => $users{$mac}->hostname
+        });
+        # update last seen
+        $db->update('devices', { lastseen => (localtime)->datetime }, {
+            mac => $mac, updatelastseen => 1
+        });
+        print "MAC $mac, ";
+        print "reachable: " . $users{$mac}->ipv4_reachable . ", ";
+        print "host " . $users{$mac}->hostname if (defined($users{$mac}->hostname));
+        print " ( " . $ips[0] . ")";
+        say '';
+    }
+    $db->commit;
+
+    my @tmp = $db->select('devices', 'handle', {
+        mac => { -in => { keys %users } }
+    })->flat;
+
+    @laboranten = keys %{{ map { $_ => 1 } @tmp }};
+}
+
 my $username = "foo";
 my $password = "bar";
 my $auth = "Basic " . MIME::Base64::encode("$username:$password", '');
+
 $done = AnyEvent->condvar;
 http_post 'http://status.raumzeitlabor.de/api/update',
-	  encode_json({ details => { geraete => $r }}),
+	  encode_json({ details => {
+          geraete => $r,
+          laboranten => \@laboranten,
+      }}),
 	  headers => {
 		  Authorization => $auth,
 	  },
@@ -97,26 +136,3 @@ http_post 'http://status.raumzeitlabor.de/api/update',
 		$done->broadcast;
 	  };
 $done->wait;
-
-
-exit 1 unless defined($db);
-$db->begin_work;
-$db->query('DELETE FROM leases');
-print "done, inserting:\n";
-for my $mac (keys %users) {
-    # TODO: handle multiple IPs
-    my @ips = $users{$mac}->ips;
-    $db->insert('leases', {
-        ip => $ips[0],
-        mac => $mac,
-        ipv4_reachable => $users{$mac}->ipv4_reachable,
-        ipv6_reachable => 0,
-        hostname => $users{$mac}->hostname
-    });
-    print "MAC $mac, ";
-    print "reachable: " . $users{$mac}->ipv4_reachable . ", ";
-    print "host " . $users{$mac}->hostname if (defined($users{$mac}->hostname));
-    print " ( " . $ips[0] . ")";
-    say '';
-}
-$db->commit;
