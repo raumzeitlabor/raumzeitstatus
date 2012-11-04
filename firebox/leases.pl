@@ -111,7 +111,7 @@ if (defined $db) {
     $db->commit;
 
     my @tmp = $db->select('devices', 'handle', {
-        mac => { -in => [ keys %users ] }
+        mac => { -in => \@reachable }
     })->flat;
 
     @laboranten = keys %{{ map { $_ => 1 } @tmp }};
