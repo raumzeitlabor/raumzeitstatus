@@ -98,10 +98,10 @@ if (defined $db) {
             ipv6_reachable => 0,
             hostname => $users{$mac}->hostname
         });
-        # update last seen
+        # update last seen (TODO: ipv6)
         $db->update('devices', { lastseen => (localtime)->datetime }, {
             mac => $mac, updatelastseen => 1
-        });
+        }) if ($users{$mac}->ipv4_reachable);
         print "MAC $mac, ";
         print "reachable: " . $users{$mac}->ipv4_reachable . ", ";
         print "host " . $users{$mac}->hostname if (defined($users{$mac}->hostname));
