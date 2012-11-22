@@ -34,6 +34,7 @@ my $stream = AnyEvent::HTTP::Stream->new(
     } else {
         $laboranten = $pkt->{details}->{laboranten};
     }
+    my $geraete = $pkt->{details}->{geraete};
 
 	my $status = $pkt->{status};
     my $old_status = $current_status;
@@ -82,7 +83,10 @@ while (1) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
             } elsif ($text =~ /^!!?weristda/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$laboranten})));
-            }
+            } elsif ($text =~ /^!!?geraete/) {
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Aktive Geräte: ".join(", ", @{$geraete})));
+            } 
+            
         });
 
     $conn->connect($server, $port, { nick => $nick, user => 'status' });
