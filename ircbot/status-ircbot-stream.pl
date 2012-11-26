@@ -19,6 +19,7 @@ my $current_status = '';
 my $conn = undef;
 my $pkt = undef;
 my $laboranten;
+my $geraete;
 
 my $stream = AnyEvent::HTTP::Stream->new(
     url => 'http://status.raumzeitlabor.de:5000/api/stream/full.json',
@@ -34,7 +35,7 @@ my $stream = AnyEvent::HTTP::Stream->new(
     } else {
         $laboranten = $pkt->{details}->{laboranten};
     }
-    my $geraete = $pkt->{details}->{geraete};
+    $geraete = $pkt->{details}->{geraete};
 
 	my $status = $pkt->{status};
     my $old_status = $current_status;
@@ -83,8 +84,9 @@ while (1) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
             } elsif ($text =~ /^!!?weristda/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$laboranten})));
-            } elsif ($text =~ /^!!?geraete/) {
-                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Aktive Geräte: ".join(", ", @{$geraete})));
+            } elsif ($text =~ /^!!?geräte/ or
+                     $text =~ /^!!?xn--gerte-ira/) {
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Aktive Geräte: $geraete"));
             } 
             
         });
