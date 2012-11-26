@@ -77,9 +77,7 @@ while (1) {
             my ($conn, $channel, $ircmsg) = @_;
             my $text = $ircmsg->{params}->[1];
 
-            if ($text =~ /^!!raum/ or
-                $text =~ /^!!status/ or
-                $text =~ /^!raum/ or
+            if ($text =~ /^!!status/ or
                 $text =~ /^!status/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
             } elsif ($text =~ /^!!?weristda/) {
@@ -87,7 +85,10 @@ while (1) {
             } elsif ($text =~ /^!!?geräte/ or
                      $text =~ /^!!?xn--gerte-ira/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Aktive Geräte: $geraete"));
-            } 
+            } elsif ($text =~ /^!!?raum/ or
+                     $text =~ /^!?raum/) {
+                $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status. Aktive Geräte: $geraete. Anwesende Laboranten: ".join(", ", @{$laboranten})));
+            }    
             
         });
 
