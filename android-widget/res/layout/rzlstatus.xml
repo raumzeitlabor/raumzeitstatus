@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent"
-  android:id="@+id/framelayout"
-  >
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/framelayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
   <ImageView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -14,15 +13,16 @@
     android:scaleType="centerInside"
     android:padding="10dip"
   />
+
   <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal|center_vertical"
-    android:layout_marginBottom="25dip"
-    android:id="@+id/lastupdate"
-    android:text="--:--"
-    android:textSize="12dip"
-    android:background="@drawable/corners"
-    android:textColor="#ffffffff"
-  />
+      android:id="@+id/lastupdate"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="left|fill_horizontal"
+      android:layout_marginBottom="25dip"
+      android:background="@drawable/corners"
+      android:text="--:--"
+      android:textColor="#ffffffff"
+      android:textSize="12dip" />
+
 </FrameLayout>
