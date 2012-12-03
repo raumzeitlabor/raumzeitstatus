@@ -3,26 +3,22 @@
  */
 package org.raumzeitlabor.status;
 
-import android.view.Gravity;
-import android.content.Context;
-import android.content.Intent;
-import android.widget.ListView;
-import android.widget.ArrayAdapter;
-import android.os.Bundle;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.widget.LinearLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.util.Log;
+import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.graphics.Rect;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class MenuPopup extends Activity {
     private static final String TAG = "rzlstatus";
@@ -72,7 +68,6 @@ public class MenuPopup extends Activity {
         container.setFocusable(true);
         container.setClickable(true);
         container.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 Intent i = StatusProvider.intentForWidget(mAppWidgetId, ".UPDATE");
                 sendBroadcast(i);
@@ -92,7 +87,6 @@ public class MenuPopup extends Activity {
         container.setFocusable(true);
         container.setClickable(true);
         container.setOnClickListener(new OnClickListener() {
-            @Override
             public void onClick(View v) {
                 Intent i = new Intent(MenuPopup.this, Configure.class);
                 i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);

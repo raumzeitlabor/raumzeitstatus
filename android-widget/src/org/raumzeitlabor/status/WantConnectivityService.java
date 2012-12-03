@@ -3,22 +3,20 @@
  */
 package org.raumzeitlabor.status;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+import java.util.ArrayList;
+
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Handler;
-import android.util.Log;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-
-import java.util.ArrayList;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.util.Log;
 
 public class WantConnectivityService extends Service {
     private static final String TAG = "rzlstatus/WCS";
@@ -83,7 +81,6 @@ public class WantConnectivityService extends Service {
             }
 
             mHandler.postDelayed(new Runnable() {
-                @Override
                 public void run() {
                     for (Integer id : widgetIds) {
                         Log.d(TAG, "Should update widget with id " + id);
