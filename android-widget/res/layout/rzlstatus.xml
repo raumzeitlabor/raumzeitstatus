@@ -12,7 +12,7 @@
     android:src="@drawable/unklar"
     android:scaleType="centerInside"
     android:padding="10dip"
-  />
+    android:contentDescription="@string/rzl_status_image"/>
 
   <TextView
       android:id="@+id/lastupdate"
@@ -21,7 +21,7 @@
       android:layout_gravity="left|fill_horizontal"
       android:layout_marginBottom="25dip"
       android:background="@drawable/corners"
-      android:text="--:--"
+      android:text="@string/SYNC_TIME_DEFAULT"
       android:textColor="#ffffffff"
       android:textSize="12dip" />
 
