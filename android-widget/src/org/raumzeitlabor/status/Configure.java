@@ -3,13 +3,10 @@
  */
 package org.raumzeitlabor.status;
 
-import android.os.Bundle;
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.content.Intent;
+import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.util.Log;
 
 public class Configure extends PreferenceActivity {
