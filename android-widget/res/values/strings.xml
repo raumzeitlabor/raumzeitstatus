@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">main</string>
+    <string name="rzl_status_image">RZL Status Image</string>
+    <string name="SYNC_TIME_DEFAULT">--:--</string>
 </resources>
