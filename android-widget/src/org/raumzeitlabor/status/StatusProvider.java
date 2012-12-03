@@ -7,31 +7,23 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.AsyncTask;
-import android.os.SystemClock;
-import android.text.format.Time;
-import android.util.Log;
-import android.widget.RemoteViews;
-import android.widget.Toast;
-import android.net.Uri;
-import android.content.SharedPreferences;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 
-import org.raumzeitlabor.status.AndroidHttpClient;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProvider;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
+import android.widget.RemoteViews;
 
 public class StatusProvider extends AppWidgetProvider {
     private static final String TAG = "rzlstatus";
