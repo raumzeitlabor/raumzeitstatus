@@ -31,9 +31,10 @@ my $stream = AnyEvent::HTTP::Stream->new(
     $pkt = decode_json($data);
     if (defined $pkt && defined $pkt->{details} && defined $pkt->{details}->{laboranten}
         && scalar @{$pkt->{details}->{laboranten}} == 0) {
-        $laboranten = ["Kühlschrank"];
+        $laboranten = ["keiner"];
     } else {
         $laboranten = $pkt->{details}->{laboranten};
+        map { $_ =~ s/^(.)/$1\x02\x02/ } @{$laboranten};
     }
     $geraete = $pkt->{details}->{geraete};
 
@@ -77,19 +78,19 @@ while (1) {
             my ($conn, $channel, $ircmsg) = @_;
             my $text = $ircmsg->{params}->[1];
 
-            if ($text =~ /^!!status/ or
-                $text =~ /^!status/) {
+            if ($text =~ /^!!status\b/ or
+                $text =~ /^!status\b/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
-            } elsif ($text =~ /^!!?weristda/) {
+            } elsif ($text =~ /^!!?weristda\b/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$laboranten})));
-            } elsif ($text =~ /^!!?geräte/ or
-                     $text =~ /^!!?xn--gerte-ira/) {
+            } elsif ($text =~ /^!!?geräte\b/ or
+                     $text =~ /^!!?xn--gerte-ira\b/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Aktive Geräte: $geraete"));
-            } elsif ($text =~ /^!!?raum/ or
-                     $text =~ /^!?raum/) {
+            } elsif ($text =~ /^!!?raum\b/ or
+                     $text =~ /^!?raum\b/) {
                 $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status. Aktive Geräte: $geraete. Anwesende Laboranten: ".join(", ", @{$laboranten})));
-            }    
-            
+            }
+
         });
 
     $conn->connect($server, $port, { nick => $nick, user => 'status' });
