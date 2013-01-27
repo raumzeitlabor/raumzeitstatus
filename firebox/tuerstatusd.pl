@@ -32,6 +32,7 @@ say $vf_log prefix() . "tuerstatusd.pl starting";
 
 # if status is b0rk, figure it out based on last action
 my $b0rk = 0;
+my $fallback_status;
 
 my $cv = AE::cv;
 my $stream = AnyEvent::HTTP::Stream->new(
@@ -63,13 +64,14 @@ my $stream = AnyEvent::HTTP::Stream->new(
                 $b0rk = 0;
                 return;
             } else {
-                # publish b0rk state only once as to not overwrite
-                # last action status
+                # publish b0rk state only once to avoid overwriting fallback status
                 unless ($b0rk) {
                     new_status('?');
                     say prefix() . "switching to fallback mode";
                     $b0rk = 1;
                 } else {
+                    # update fallback status (otherwise it will timeout)
+                    new_status($fallback_status) if defined $fallback_status;
                     say prefix() . "remaining in fallback mode";
                 }
                 return;
@@ -79,10 +81,10 @@ my $stream = AnyEvent::HTTP::Stream->new(
         # fallback mode
         if ($pkt->{payload} =~ /^VF \d+ OK/ || $pkt->{payload} =~ /^OPEN/) {
             say $vf_log prefix() . "door was unlocked";
-            new_status('1') if ($b0rk);
+            $fallback_status = 1;
         } elsif ($pkt->{payload} =~ /^LOCK/) {
             say $vf_log prefix() . "door was locked";
-            new_status('0') if ($b0rk);
+            $fallback_status = 0;
         }
     },
     on_error => sub {
