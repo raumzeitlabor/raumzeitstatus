@@ -77,7 +77,7 @@ my $stream = AnyEvent::HTTP::Stream->new(
         }
 
         # fallback mode
-        if ($pkt->{payload} =~ /^VF \d+ OK/) {
+        if ($pkt->{payload} =~ /^VF \d+ OK/ || $pkt->{payload} =~ /^OPEN/) {
             say $vf_log prefix() . "door was unlocked";
             new_status('1') if ($b0rk);
         } elsif ($pkt->{payload} =~ /^LOCK/) {
