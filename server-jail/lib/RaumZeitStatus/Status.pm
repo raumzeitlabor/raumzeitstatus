@@ -50,6 +50,7 @@ sub _update_door_unlocked {
     $self->_timer(AE::timer 300, 0, sub {
         $self->clear_lockstate;
         $self->clear_device_count;
+        $self->clear_user;
         $self->_mq->publish($self->full_status);
     });
 }
