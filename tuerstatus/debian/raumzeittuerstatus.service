@@ -1,0 +1,12 @@
+[Unit]
+Description=polls and publishes the RZL door state
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/tuerstatusd
+Restart=on-failure
+User=rzl
+Group=rzl
+
+[Install]
+WantedBy=multi-user.target

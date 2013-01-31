@@ -1,0 +1,31 @@
+---
+abstract: ~
+author:
+  - 'Michael Stapelberg, Simon Elsbrock.'
+  - 'Simon Elsbrock <simon@iodev.org>'
+build_requires:
+  ExtUtils::MakeMaker: 6.59
+configure_requires:
+  ExtUtils::MakeMaker: 6.59
+distribution_type: module
+dynamic_config: 1
+generated_by: 'Module::Install version 1.06'
+license: gpl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: RaumZeitTuerstatus
+no_index:
+  directory:
+    - inc
+requires:
+  AnyEvent: 0
+  AnyEvent::HTTP: 0
+  AnyEvent::HTTP::Stream: 0
+  JSON::XS: 0
+  RRDTool::OO: 0
+  YAML::Syck: 0
+  perl: 5.10.0
+resources:
+  license: http://opensource.org/licenses/gpl-license.php
+version: 1.00

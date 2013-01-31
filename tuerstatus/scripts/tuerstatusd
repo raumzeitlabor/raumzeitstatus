@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+# vim:ts=4:sw=4:expandtab
+# © 2012 Simon Elsbrock (see also: LICENSE)
+
+use strict;
+use warnings;
+use feature qw(say);
+use Getopt::Long;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use RaumZeitLabor::Hausbus::Tuerstatus;
+
+GetOptions(
+    'version' => sub {
+        say "$0 v$RaumZeitLabor::Hausbus::Tuerstatus::VERSION";
+        exit 0;
+    },
+    'help' => sub {
+        say "$0: no options, started via initscript.";
+        exit 0;
+    }
+);
+
+RaumZeitLabor::Hausbus::Tuerstatus->run();

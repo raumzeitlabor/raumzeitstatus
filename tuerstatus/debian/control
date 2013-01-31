@@ -1,0 +1,30 @@
+Source: raumzeittuerstatus
+Section: perl
+Priority: optional
+Maintainer: Simon Elsbrock <simon@iodev.org>
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: libanyevent-http-perl,
+ libanyevent-http-stream-perl,
+ libanyevent-perl,
+ libjson-xs-perl,
+ librrdtool-oo-perl,
+ libyaml-syck-perl,
+ perl,
+ perl-modules
+Standards-Version: 3.9.2
+Homepage: http://search.cpan.org/dist/RaumZeitTuerstatus/
+
+Package: raumzeittuerstatus
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libanyevent-http-perl,
+ libanyevent-http-stream-perl,
+ libanyevent-perl,
+ libjson-xs-perl,
+ librrdtool-oo-perl,
+ libyaml-syck-perl,
+ perl
+Description: unknown
+ (no description was found)
+ .
+ This description was automagically extracted from the module by dh-make-perl.
