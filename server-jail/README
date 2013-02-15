@@ -14,7 +14,7 @@ example rc.d-script:
 
 #!/bin/sh
 #
-# RaumZeitStatus rc.d script
+# RaumZeitLabor::Status rc.d script
 #
 
 # PROVIDE: raumzeitstatus

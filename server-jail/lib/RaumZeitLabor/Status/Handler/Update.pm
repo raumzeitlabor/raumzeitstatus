@@ -1,16 +1,16 @@
 # vim:ts=4:sw=4:expandtab
-package RaumZeitStatus::Handler::Update;
+package RaumZeitLabor::Status::Handler::Update;
 
 use strict;
 use parent qw(Tatsumaki::Handler);
-use RaumZeitStatus::Status;
+use RaumZeitLabor::Status::Status;
 use Tatsumaki::MessageQueue;
 use JSON::XS;
 use v5.10;
 our $VERSION = '0.01';
 __PACKAGE__->asynchronous(1);
 
-my $status = RaumZeitStatus::Status->new;
+my $status = RaumZeitLabor::Status::Status->new;
 my $mq = Tatsumaki::MessageQueue->instance('status');
 
 sub post {

@@ -1,22 +1,21 @@
 # vim:ts=4:sw=4:expandtab
-package RaumZeitStatus::Handler::Full;
+package RaumZeitLabor::Status::Handler::Simple;
 
 use strict;
 use parent qw(Tatsumaki::Handler);
-use RaumZeitStatus::Status;
-use JSON::XS;
 use v5.10;
+use RaumZeitLabor::Status::Status;
 our $VERSION = '0.01';
 __PACKAGE__->asynchronous(1);
 
-my $status = RaumZeitStatus::Status->new;
+my $status = RaumZeitLabor::Status::Status->new;
 
 sub get {
     my ($self) = @_;
 
-    $self->response->content_type('application/json');
+    $self->response->content_type('text/plain');
     $self->response->headers([ 'Access-Control-Allow-Origin' => '*' ]);
-    $self->write($status->full_status);
+    $self->write($status->total_status);
     $self->finish;
 }
 

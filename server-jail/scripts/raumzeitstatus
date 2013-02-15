@@ -4,10 +4,10 @@
 
 use strict;
 use warnings;
-use RaumZeitStatus;
+use RaumZeitLabor::Status;
 use Plack::Builder;
 
-my $app = RaumZeitStatus->webapp;
+my $app = RaumZeitLabor::Status->webapp;
 
 builder {
     # require authorization for /api/update

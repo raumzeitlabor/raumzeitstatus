@@ -1,5 +1,5 @@
 # vim:ts=4:sw=4:expandtab
-package RaumZeitStatus::Status;
+package RaumZeitLabor::Status::Status;
 
 use strict;
 use Moose;
