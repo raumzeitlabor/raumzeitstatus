@@ -43,7 +43,7 @@ my $laboranten;
 my $geraete;
 
 my $stream = AnyEvent::HTTP::Stream->new(
-    url => 'http://status.raumzeitlabor.de:5000/api/stream/full.json',
+    url => 'http://127.0.0.1:5000/api/stream/full.json',
     on_data => sub {
         my ($data) = @_;
         $pkt = decode_json($data);
