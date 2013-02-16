@@ -1,0 +1,29 @@
+Source: raumzeitstatus
+Section: perl
+Priority: optional
+Maintainer: Simon Elsbrock <simon@iodev.org>
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: libev-perl,
+ libjson-xs-perl,
+ libmoosex-singleton-perl,
+ libplack-perl,
+ libtatsumaki-perl,
+ perl,
+ twiggy
+Standards-Version: 3.9.2
+Homepage: http://search.cpan.org/dist/RaumZeitLabor-Status/
+
+Package: raumzeitstatus
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libev-perl,
+ libjson-xs-perl,
+ libmoosex-singleton-perl,
+ libplack-perl,
+ libtatsumaki-perl,
+ perl,
+ twiggy
+Description: Der RaumZeitLabor Status-Handler.
+ (no description was found)
+ .
+ This description was automagically extracted from the module by dh-make-perl.

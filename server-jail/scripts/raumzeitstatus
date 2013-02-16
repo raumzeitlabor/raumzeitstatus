@@ -2,25 +2,41 @@
 # vim:ts=4:sw=4:expandtab
 # use plackup -Ilib --port 8000 bin/raumzeitstatus
 
+BEGIN {
+    use FindBin;
+    if ($FindBin::Bin =~ m,/script/?$,) {
+        use lib "$FindBin::Bin/../lib";
+    }
+}
+
 use strict;
 use warnings;
+
 use RaumZeitLabor::Status;
+
+use Twiggy::Server;
+use EV;
 use Plack::Builder;
 
-my $app = RaumZeitLabor::Status->webapp;
+my $statusapp = RaumZeitLabor::Status->webapp;
 
-builder {
+my $app = builder {
     # require authorization for /api/update
     enable_if
         { $_[0]{PATH_INFO} =~ m,/api/update, }
         'Plack::Middleware::Auth::Basic',
-        authenticator => \&check_pw;
-
-    $app;
+        authenticator => sub {
+            my ($user, $pass) = @_;
+            return ($user eq 'foo' && $pass eq 'bar');
+        };
+    $statusapp;
 };
 
-sub check_pw {
-    my ($user, $pass) = @_;
+my $server = Twiggy::Server->new(
+    host => '127.0.0.1',
+    port => 5000,
+);
 
-    return ($user eq 'foo' && $pass eq 'bar');
-}
+$server->register_service($app);
+
+EV::loop;
