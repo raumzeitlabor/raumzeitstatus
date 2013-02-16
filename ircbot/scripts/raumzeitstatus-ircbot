@@ -1,0 +1,16 @@
+#!/usr/bin/env perl
+# vim:ts=4:sw=4:expandtab
+# use plackup -Ilib --port 8000 bin/raumzeitstatus
+
+BEGIN {
+    use FindBin;
+    if ($FindBin::Bin =~ m,/script/?$,) {
+        use lib "$FindBin::Bin/../lib";
+    }
+}
+
+use strict;
+use warnings;
+
+use RaumZeitLabor::Status::IRCBot;
+RaumZeitLabor::Status::IRCBot->run;

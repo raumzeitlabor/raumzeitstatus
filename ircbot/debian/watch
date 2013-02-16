@@ -1,0 +1,2 @@
+version=3
+http://search.cpan.org/dist/RaumZeitLabor-Status-IRCBot/   .*/RaumZeitLabor-Status-IRCBot-v?(\d[\d.-]+)\.(?:tar(?:\.gz|\.bz2)?|tgz|zip)$

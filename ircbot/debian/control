@@ -1,0 +1,27 @@
+Source: raumzeitstatus-ircbot
+Section: perl
+Priority: optional
+Maintainer: Simon Elsbrock <simon@iodev.org>
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: libanyevent-http-stream-perl,
+ libanyevent-irc-perl,
+ libanyevent-perl,
+ libio-all-perl,
+ libjson-xs-perl,
+ perl,
+Standards-Version: 3.9.2
+Homepage: http://search.cpan.org/dist/RaumZeitLabor-Status-IRCBot/
+
+Package: raumzeitstatus-ircbot
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libanyevent-http-stream-perl,
+ libanyevent-irc-perl,
+ libanyevent-perl,
+ libio-all-perl,
+ libjson-xs-perl,
+ perl
+Description: Der RaumZeitLabor Statusbot fürs IRC.
+ (no description was found)
+ .
+ This description was automagically extracted from the module by dh-make-perl.

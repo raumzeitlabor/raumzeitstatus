@@ -1,6 +1,6 @@
 use inc::Module::Install;
 
-name     'RaumZeitLabor-Status-IRCBot';
+name     'RaumZeitStatus-IRCBot';
 all_from 'lib/RaumZeitLabor/Status/IRCBot.pm';
 author   q{Simon Elsbrock <simon@iodev.org>};
 license  'gpl';
@@ -13,6 +13,8 @@ requires 'AnyEvent::IRC::Client';
 requires 'IO::All';
 requires 'JSON::XS';
 requires 'Data::Dumper';
+
+install_script 'scripts/raumzeitstatus-ircbot';
 
 auto_install;
 

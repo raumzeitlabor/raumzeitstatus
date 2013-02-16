@@ -35,7 +35,7 @@ Postet Updates des RaumZeitStatus in unseren IRC Channel.
 my $server = "irc.hackint.net";
 my $port = 6667;
 my $nick = "RaumZeitStatus";
-my @channels = qw(#raumzeitlabor);
+my @channels = ("#raumzeitlabor");
 my $current_status = '';
 my $conn = undef;
 my $pkt = undef;
