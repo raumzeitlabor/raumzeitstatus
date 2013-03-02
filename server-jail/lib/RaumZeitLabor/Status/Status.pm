@@ -31,6 +31,13 @@ has 'user' => (
     clearer => 'clear_user',
 );
 
+has 'mail' => (
+    isa => 'ArrayRef',
+    is => 'rw',
+    predicate => 'mail_available',
+    clearer => 'clear_mail',
+);
+
 has '_timer' => (
     isa => 'Ref',
     is => 'rw',
@@ -77,6 +84,7 @@ sub full_status {
             tuer => ($self->lockstate_available ? $self->door_unlocked : '?'),
             geraete => ($self->device_count_available ? $self->device_count : '?'),
             laboranten => ($self->user_available ? $self->user : []),
+	    mails => ($self->mail_available ? { Name => $self->user, Mail => $self->mail } : [] ),
         }
     );
 
