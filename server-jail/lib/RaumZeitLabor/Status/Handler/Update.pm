@@ -29,6 +29,10 @@ sub post {
         $status->user($update->{details}->{laboranten});
     }
 
+    if (exists $update->{details}->{mails}) {
+	$status->mail($update->{details}->{mails});
+    }
+
     # publish the new status to the messagequeue if changed
     my $new_status = $status->full_status;
     if ($new_status ne $old_status) {
