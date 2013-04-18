@@ -101,13 +101,13 @@ sub run {
                     $text =~ /^!status\b/) {
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
                 } elsif ($text =~ /^!!?weristda\b/) {
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$laboranten})));
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Anwesende Personen: ".join(", ", @{$laboranten})));
                 } elsif ($text =~ /^!!?geräte\b/ or
                          $text =~ /^!!?xn--gerte-ira\b/) {
                     $conn->send_chan($channel, 'PRIVMSG', ($channel, "Aktive Geräte: $geraete"));
                 } elsif ($text =~ /^!!?raum\b/ or
                          $text =~ /^!?raum\b/) {
-                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status. Aktive Geräte: $geraete. Anwesende Laboranten: ".join(", ", @{$laboranten})));
+                    $conn->send_chan($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status. Aktive Geräte: $geraete. Anwesende Personen: ".join(", ", @{$laboranten})));
                 }
 
             });
