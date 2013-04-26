@@ -52,7 +52,9 @@ my $stream = AnyEvent::HTTP::Stream->new(
             $laboranten = ["keiner"];
         } else {
             $laboranten = $pkt->{details}->{laboranten};
-            map { $_ =~ s/^(.)/$1/ } @{$laboranten};
+            # insert ZERO WIDTH NO-BREAK SPACE after first char
+            # http://dl.iodev.org/unicode.jpg (sorry, blabber)
+            map { $_ =~ s/^(.)/$1\N{U+FEFF}/ } @{$laboranten};
         }
         $geraete = $pkt->{details}->{geraete};
 
