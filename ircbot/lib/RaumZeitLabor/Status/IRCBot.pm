@@ -101,7 +101,7 @@ sub run {
 
                 if ($text =~ /^!!status\b/ or
                     $text =~ /^!status\b/) {
-                    $conn->send_long_message("utf8", 0, 'PRIVMSG', ($channel, 'PRIVMSG', ($channel, "Raumstatus: $current_status")));
+                    $conn->send_long_message("utf8", 0, 'PRIVMSG', ($channel, "Raumstatus: $current_status"));
                 } elsif ($text =~ /^!!?weristda\b/) {
                     $conn->send_long_message("utf8", 0, 'PRIVMSG', ($channel, "Anwesende Laboranten: ".join(", ", @{$laboranten})));
                 } elsif ($text =~ /^!!?geräte\b/ or
