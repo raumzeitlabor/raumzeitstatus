@@ -14,34 +14,70 @@ has url => (is => 'ro', default => 'http://s.rzl.so/api/stream/full.json');
 has door => (is => 'rw');
 
 my @array_attr = (
-    is => 'rw', traits => ['Array'], default => sub { [] }, auto_deref => 1
+    traits => ['Array'], default => sub { [] }, auto_deref => 1
 );
 has _raw_members => (
-    @array_attr,
+    is => 'ro', @array_attr,
     writer => 'set_members',
     handles => { members => 'elements' },
 );
+has _members_timeout => (
+    is => 'ro', traits => ['Hash'], default => sub { {} },
+    handles => {
+        members_timeout => 'keys',
+        destroy_timeout => 'delete',
+        exists_timeout => 'exists',
+        add_timeout => 'set',
+    },
+);
+
+around 'members' => func ($orig, $self) {
+    my @m = $self->$orig();
+    push @m, $self->members_timeout;
+    return @m
+};
+
+# since smartphones regularly disconnect from wlan,
+# only call the part callbacks after a timeout,
+# choose 60 seconds (+ 5% difference)
+has flapping_timeout => (
+    is => 'rw',
+    default => 63,
+);
+
 has join_cb => (
-    @array_attr,
+    is => 'rw', @array_attr,
     handles => { register_join => 'push' },
 );
+
 has part_cb => (
-    @array_attr,
+    is => 'rw', @array_attr,
     handles => { register_part => 'push' },
 );
 
 around 'set_members' => func ($orig, $self, $members) {
-    my @before = $self->members;
-    say "before: @before";
+    my @before = $self->_raw_members;
+    # say "@$members";
+
     if (my @joined = grep { not $_ ~~ @before } @$members) {
-        say "joined: @joined";
+        $self->destroy_timeout(@joined);
         $self->$_(@joined) for $self->join_cb;
     }
-    if (my @parted = grep { not $_ ~~ @$members } @before) {
-        say "parted: @parted";
-        $self->$_(@parted) for $self->part_cb;
+
+    my @timeouts = $self->members_timeout;
+    my @parted = grep { not $_ ~~ @timeouts }
+                 grep { not $_ ~~ @$members }
+                 @before;
+    my $timeout = $self->flapping_timeout;
+    for my $member (@parted) {
+        $self->add_timeout(
+            $member => AnyEvent->timer(after => $timeout, cb => sub {
+                    $self->$_($member) for $self->part_cb;
+            }),
+        );
     }
 
+    # say "timeout: @{[ $self->members_timeout ]}";
     $self->$orig($members);
 
 };
