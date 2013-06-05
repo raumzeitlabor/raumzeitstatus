@@ -61,7 +61,7 @@ around 'set_members' => func ($orig, $self, $members) {
 
     my @timeouts = $self->members_timeout;
 
-    if (@joined = grep { not $_ ~~ @before } @$members) {
+    if (my @joined = grep { not $_ ~~ @before } @$members) {
         $self->destroy_timeout(@joined);
 
         # don't call join callbacks for aborted timeouts
