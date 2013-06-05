@@ -59,12 +59,17 @@ around 'set_members' => func ($orig, $self, $members) {
     my @before = $self->_raw_members;
     # say "@$members";
 
-    if (my @joined = grep { not $_ ~~ @before } @$members) {
+    my @timeouts = $self->members_timeout;
+
+    if (@joined = grep { not $_ ~~ @before } @$members) {
         $self->destroy_timeout(@joined);
+
+        # don't call join callbacks for aborted timeouts
+        @joined = grep { not $_ ~~ @timeouts } @joined;
+
         $self->$_(@joined) for $self->join_cb;
     }
 
-    my @timeouts = $self->members_timeout;
     my @parted = grep { not $_ ~~ @timeouts }
                  grep { not $_ ~~ @$members }
                  @before;
