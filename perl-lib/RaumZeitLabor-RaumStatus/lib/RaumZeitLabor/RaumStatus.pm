@@ -84,8 +84,10 @@ around 'set_members' => func ($orig, $self, $_members) {
         # don't call join callbacks for aborted timeouts
         @joined = grep { not $_ ~~ @timeouts } @joined;
 
-        d("calling join_cb for: @joined");
-        $self->$_(@joined) for $self->join_cb;
+        if (@joined) {
+            d("calling join_cb for: @joined");
+            $self->$_(@joined) for $self->join_cb;
+        }
     }
 
     my @parted = grep { not $_ ~~ @timeouts }
