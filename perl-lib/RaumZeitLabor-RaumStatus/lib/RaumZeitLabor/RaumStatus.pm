@@ -1,6 +1,6 @@
 use v5.14;
 use utf8;
-package RaumZeitLabor::RaumStatus 0.1;
+package RaumZeitLabor::RaumStatus 0.2;
 
 # not in core
 use AnyEvent::HTTP;
@@ -115,7 +115,6 @@ method feed_jsonstring ($data) {
     my $members = $pkt->{details}{laboranten} || [];
     $self->set_members($members);
 }
-
 
 method _connect {
     my $url = $self->url;
