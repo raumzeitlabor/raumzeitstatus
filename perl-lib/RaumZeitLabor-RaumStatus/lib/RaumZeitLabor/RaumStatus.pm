@@ -77,18 +77,21 @@ around 'set_members' => func ($orig, $self, $_members) {
 
     $self->$orig(\@members);
 
-    if (my @joined = grep { not $_ ~~ @before } @members) {
+    if (my @diff = grep { not $_ ~~ @before } @members) {
+        my @joined = grep { not $_ ~~ @timeouts } @diff;
         d("joined: @joined");
-        $self->destroy_timeout($_) for @joined;
 
-        # don't call join callbacks for aborted timeouts
-        @joined = grep { not $_ ~~ @timeouts } @joined;
+        my @canceled_timeouts = grep { $_ ~~ @timeouts } @diff;
+        $self->destroy_timeout($_) for @canceled_timeouts;
 
         if (@joined) {
             d("calling join_cb for: @joined");
             $self->$_(@joined) for $self->join_cb;
         }
     }
+
+    # update timeouts, because we may have invalided some
+    @timeouts = sort $self->members_timeout;
 
     my @parted = grep { not $_ ~~ @timeouts }
                  grep { not $_ ~~ @members }
