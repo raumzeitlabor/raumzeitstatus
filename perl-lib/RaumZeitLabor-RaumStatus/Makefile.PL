@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use 5.006;
 use strict;
 use warnings FATAL => 'all';
@@ -7,7 +8,7 @@ WriteMakefile(
     NAME             => 'RaumZeitLabor::RaumStatus',
     AUTHOR           => q{Maik Fischer <maikf+rzl-raumstatus@qu.cx>},
     VERSION_FROM     => 'lib/RaumZeitLabor/RaumStatus.pm',
-    ABSTRACT_FROM    => 'lib/RaumZeitLabor/RaumStatus.pm',
+    ABSTRACT         => 'RaumZeitLabor Raumstatus API',
     LICENSE          => 'Artistic_2_0',
     PL_FILES         => {},
     MIN_PERL_VERSION => 5.014,
