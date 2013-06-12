@@ -77,6 +77,7 @@ around 'set_members' => func ($orig, $self, $members) {
     for my $member (@parted) {
         $self->add_timeout(
             $member => AnyEvent->timer(after => $timeout, cb => sub {
+                    $self->destroy_timeout($member);
                     $self->$_($member) for $self->part_cb;
             }),
         );
