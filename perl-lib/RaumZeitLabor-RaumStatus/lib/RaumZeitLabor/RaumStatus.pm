@@ -25,7 +25,7 @@ my @array_attr = (
     traits => ['Array'], default => sub { [] }, auto_deref => 1
 );
 has _raw_members => (
-    is => 'ro', @array_attr,
+    is => 'rw', @array_attr,
     writer => 'set_members',
     handles => { members => 'elements' },
 );
@@ -63,15 +63,21 @@ has part_cb => (
     handles => { register_part => 'push' },
 );
 
-around 'set_members' => func ($orig, $self, $members) {
-    my @before = $self->_raw_members;
-    my @timeouts = $self->members_timeout;
+around 'set_members' => func ($orig, $self, $_members) {
+    my @members = sort @$_members;
+    my @before = sort $self->_raw_members;
+    my @timeouts = sort $self->members_timeout;
 
-    d("set_member: @$members",
+    # do nothing if nothing has changed
+    return if @members ~~ @before;
+
+    d("set_member: @members",
         "before: @before",
         "timeouts: @timeouts");
 
-    if (my @joined = grep { not $_ ~~ @before } @$members) {
+    $self->$orig(\@members);
+
+    if (my @joined = grep { not $_ ~~ @before } @members) {
         d("joined: @joined");
         $self->destroy_timeout($_) for @joined;
 
@@ -83,7 +89,7 @@ around 'set_members' => func ($orig, $self, $members) {
     }
 
     my @parted = grep { not $_ ~~ @timeouts }
-                 grep { not $_ ~~ @$members }
+                 grep { not $_ ~~ @members }
                  @before;
     my $timeout = $self->flapping_timeout;
     for my $member (@parted) {
@@ -96,9 +102,6 @@ around 'set_members' => func ($orig, $self, $members) {
             }),
         );
     }
-
-    $self->$orig($members);
-
 };
 
 method BUILD { $self->_connect }
@@ -115,7 +118,8 @@ method _connect {
             warn "bad data: '$data'\n";
             return 1; # but keep on reading
         }
-        $self->set_members($pkt->{details}{laboranten} || []);
+        my $members = $pkt->{details}{laboranten} || [];
+        $self->set_members($members);
 
         return 1; # read more data
     }, sub {
