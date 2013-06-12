@@ -106,6 +106,17 @@ around 'set_members' => func ($orig, $self, $_members) {
 
 method BUILD { $self->_connect }
 
+method feed_jsonstring ($data) {
+    my $pkt = eval { decode_json($data) };
+    if (not $pkt) {
+        d('bad json:', $data);
+        return;
+    }
+    my $members = $pkt->{details}{laboranten} || [];
+    $self->set_members($members);
+}
+
+
 method _connect {
     my $url = $self->url;
     state $reconnect;
@@ -113,13 +124,7 @@ method _connect {
         # it is a keep-alive packet, keep reading
         return 1 if $data eq "\r\n";
 
-        my $pkt = eval { decode_json($data) };
-        if (not $pkt) {
-            warn "bad data: '$data'\n";
-            return 1; # but keep on reading
-        }
-        my $members = $pkt->{details}{laboranten} || [];
-        $self->set_members($members);
+        $self->feed_jsonstring($data);
 
         return 1; # read more data
     }, sub {
