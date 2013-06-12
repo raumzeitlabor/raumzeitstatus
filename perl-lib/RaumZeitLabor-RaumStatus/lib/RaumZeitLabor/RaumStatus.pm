@@ -7,6 +7,14 @@ use AnyEvent::HTTP;
 use JSON::XS;
 use Method::Signatures::Simple;
 
+sub d {
+    my $msg = scalar localtime;
+    $msg .= ' ' . shift if @_ == 1;
+    $msg .= "\n\t" . join"\n\t", @_ if @_;
+    STDERR->print("$msg\n");
+    return;
+}
+
 use Moose;
 
 has url => (is => 'ro', default => 'http://s.rzl.so/api/stream/full.json');
@@ -57,16 +65,20 @@ has part_cb => (
 
 around 'set_members' => func ($orig, $self, $members) {
     my @before = $self->_raw_members;
-    # say "@$members";
-
     my @timeouts = $self->members_timeout;
 
+    d("set_member: @$members",
+        "before: @before",
+        "timeouts: @timeouts");
+
     if (my @joined = grep { not $_ ~~ @before } @$members) {
-        $self->destroy_timeout(@joined);
+        d("joined: @joined");
+        $self->destroy_timeout($_) for @joined;
 
         # don't call join callbacks for aborted timeouts
         @joined = grep { not $_ ~~ @timeouts } @joined;
 
+        d("calling join_cb for: @joined");
         $self->$_(@joined) for $self->join_cb;
     }
 
@@ -75,15 +87,16 @@ around 'set_members' => func ($orig, $self, $members) {
                  @before;
     my $timeout = $self->flapping_timeout;
     for my $member (@parted) {
+        d("timeout, add timer for: $member");
         $self->add_timeout(
             $member => AnyEvent->timer(after => $timeout, cb => sub {
                     $self->destroy_timeout($member);
+                    d("calling part_cb for $member");
                     $self->$_($member) for $self->part_cb;
             }),
         );
     }
 
-    # say "timeout: @{[ $self->members_timeout ]}";
     $self->$orig($members);
 
 };
