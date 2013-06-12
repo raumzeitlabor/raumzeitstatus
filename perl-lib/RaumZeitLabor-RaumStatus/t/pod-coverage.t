@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings FATAL => 'all';
-use Test::More;
+use Test::More skip_all => 'XXX';
 
 # Ensure a recent version of Test::Pod::Coverage
 my $min_tpc = 1.08;
