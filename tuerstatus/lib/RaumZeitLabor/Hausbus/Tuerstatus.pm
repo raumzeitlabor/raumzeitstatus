@@ -61,7 +61,7 @@ sub new_status {
     my $username = $cfg->{RaumZeitStatus}->{user};
     my $password = $cfg->{RaumZeitStatus}->{pass};
     my $auth = "Basic " . MIME::Base64::encode("$username:$password", '');
-    http_post 'http://status.raumzeitlabor.de/api/update',
+    http_post 'https://status.raumzeitlabor.de/api/update',
         encode_json({ status => $output }),
         headers => {
             Authorization => $auth,
