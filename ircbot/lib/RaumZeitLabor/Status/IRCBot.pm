@@ -5,6 +5,7 @@ package RaumZeitLabor::Status::IRCBot;
 
 use strict;
 use warnings;
+use charnames ':full';
 
 use AnyEvent;
 use AnyEvent::HTTP::Stream;
@@ -52,9 +53,10 @@ my $stream = AnyEvent::HTTP::Stream->new(
             $laboranten = ["keiner"];
         } else {
             $laboranten = $pkt->{details}->{laboranten};
-            # insert ZERO WIDTH NO-BREAK SPACE after first char
-            # http://dl.iodev.org/unicode.jpg (sorry, blabber)
-            s/^(.)/$1\N{U+FEFF}/ for @$laboranten;
+            # don't annoy $laboranten by hilighting them.
+            # We circumvent string matching by insert WORD JOINER after the first character.
+            # see also: http://en.wikipedia.org/wiki/Zero-width_non-breaking_space
+            s/^(.)/$1\N{WORD JOINER}/ for @$laboranten;
         }
         $geraete = $pkt->{details}->{geraete};
 
