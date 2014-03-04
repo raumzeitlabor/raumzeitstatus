@@ -32,42 +32,23 @@ public final class R {
     public static final class drawable {
         public static final int auf=0x7f020000;
         public static final int corners=0x7f020001;
-        public static final int ic_menu_refresh=0x7f020002;
-        public static final int quickcontact_arrow_down=0x7f020003;
-        public static final int quickcontact_arrow_up=0x7f020004;
-        public static final int quickcontact_bottom_frame=0x7f020005;
-        public static final int quickcontact_disambig_bottom_bg=0x7f020006;
-        public static final int quickcontact_disambig_divider=0x7f020007;
-        public static final int quickcontact_drop_shadow=0x7f020008;
-        public static final int quickcontact_photo_frame=0x7f020009;
-        public static final int quickcontact_slider_background=0x7f02000a;
-        public static final int quickcontact_slider_btn=0x7f02000b;
-        public static final int quickcontact_slider_btn_normal=0x7f02000c;
-        public static final int quickcontact_slider_btn_on=0x7f02000d;
-        public static final int quickcontact_slider_btn_pressed=0x7f02000e;
-        public static final int quickcontact_slider_btn_selected=0x7f02000f;
-        public static final int quickcontact_slider_grip_left=0x7f020010;
-        public static final int quickcontact_slider_grip_right=0x7f020011;
-        public static final int quickcontact_top_frame=0x7f020012;
-        public static final int unklar=0x7f020013;
-        public static final int zu=0x7f020014;
+        public static final int ic_action_refresh=0x7f020002;
+        public static final int ic_action_settings=0x7f020003;
+        public static final int ic_menu_refresh=0x7f020004;
+        public static final int unklar=0x7f020005;
+        public static final int zu=0x7f020006;
     }
     public static final class id {
-        public static final int Corners=0x7f090008;
-        public static final int footer=0x7f090004;
-        public static final int framelayout=0x7f090005;
-        public static final int icon=0x7f090000;
-        public static final int lastupdate=0x7f090007;
-        public static final int scroll=0x7f090002;
-        public static final int statusimage=0x7f090006;
-        public static final int title=0x7f090001;
-        public static final int tracks=0x7f090003;
+        public static final int Corners=0x7f090005;
+        public static final int framelayout=0x7f090002;
+        public static final int lastupdate=0x7f090004;
+        public static final int refresh=0x7f090000;
+        public static final int settings=0x7f090001;
+        public static final int statusimage=0x7f090003;
     }
     public static final class layout {
-        public static final int action_item=0x7f030000;
-        public static final int main=0x7f030001;
-        public static final int quickaction=0x7f030002;
-        public static final int rzlstatus=0x7f030003;
+        public static final int quickaction=0x7f030000;
+        public static final int rzlstatus=0x7f030001;
     }
     public static final class string {
         public static final int SYNC_TIME_DEFAULT=0x7f070000;

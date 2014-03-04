@@ -1,59 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-        
-	<TextView
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignRight="@+id/scroll"
-		android:layout_alignLeft="@id/scroll"
-		android:id="@+id/title"
-		android:text="RaumZeitStatus"
-		android:textStyle="bold"
-		android:textColor="#ff000000"
-		android:paddingLeft="10dip"
-        android:background="@drawable/quickcontact_top_frame"
-	/>
-       
-    <HorizontalScrollView
-        android:id="@id/scroll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fadingEdgeLength="0dip"
-        android:layout_below="@id/title"
-        android:background="@drawable/quickcontact_slider_background"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:id="@+id/tracks"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip" 
-            android:orientation="horizontal">
-        
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/quickcontact_slider_grip_left" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/quickcontact_slider_grip_right" />
-                
-        </LinearLayout>
-            
-    </HorizontalScrollView>
-
-    <FrameLayout
-        android:id="@+id/footer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"        
-        android:layout_below="@id/scroll"
-        android:layout_alignRight="@id/scroll"
-		android:layout_alignLeft="@id/scroll"
-        android:background="@drawable/quickcontact_bottom_frame" />
-
+    android:layout_width="144dp"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:background="#000000">
+    <ImageView
+        android:id="@+id/refresh"
+        android:layout_width="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_action_refresh" />
+    <ImageView
+        android:id="@+id/settings"
+        android:layout_width="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_action_settings" />
 </RelativeLayout>

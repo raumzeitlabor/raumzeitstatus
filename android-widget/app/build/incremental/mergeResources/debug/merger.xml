@@ -9,16 +9,6 @@
                 qualifiers=""
                 type="layout" />
             <file
-                name="main"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/main.xml"
-                qualifiers=""
-                type="layout" />
-            <file
-                name="action_item"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/action_item.xml"
-                qualifiers=""
-                type="layout" />
-            <file
                 name="rzlstatus"
                 path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/rzlstatus.xml"
                 qualifiers=""
@@ -96,11 +86,6 @@
             <file
                 name="unklar"
                 path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/unklar.png"
-                qualifiers=""
-                type="drawable" />
-            <file
-                name="quickcontact_slider_btn"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/quickcontact_slider_btn.xml"
                 qualifiers=""
                 type="drawable" />
             <file
@@ -246,79 +231,44 @@ one day
                 qualifiers="mdpi"
                 type="drawable" />
             <file
-                name="quickcontact_slider_btn_selected"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_selected.9.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_settings"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-mdpi/ic_action_settings.png"
+                qualifiers="mdpi"
                 type="drawable" />
             <file
-                name="quickcontact_slider_grip_left"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_grip_left.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_refresh"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-xhdpi/ic_action_refresh.png"
+                qualifiers="xhdpi"
                 type="drawable" />
             <file
-                name="quickcontact_slider_background"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_background.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_settings"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi/ic_action_settings.png"
+                qualifiers="hdpi"
                 type="drawable" />
             <file
-                name="quickcontact_photo_frame"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_photo_frame.9.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_settings"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-xhdpi/ic_action_settings.png"
+                qualifiers="xhdpi"
                 type="drawable" />
             <file
-                name="quickcontact_slider_btn_on"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_on.9.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_refresh"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-mdpi/ic_action_refresh.png"
+                qualifiers="mdpi"
                 type="drawable" />
             <file
-                name="quickcontact_arrow_up"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_arrow_up.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_refresh"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi/ic_action_refresh.png"
+                qualifiers="hdpi"
                 type="drawable" />
             <file
-                name="quickcontact_top_frame"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_top_frame.9.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_refresh"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-xxhdpi/ic_action_refresh.png"
+                qualifiers="xxhdpi"
                 type="drawable" />
             <file
-                name="quickcontact_arrow_down"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_arrow_down.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_disambig_divider"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_disambig_divider.9.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_disambig_bottom_bg"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_disambig_bottom_bg.9.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_drop_shadow"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_drop_shadow.9.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_slider_btn_pressed"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_pressed.9.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_slider_btn_normal"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_normal.9.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_slider_grip_right"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_grip_right.png"
-                qualifiers="hdpi-finger"
-                type="drawable" />
-            <file
-                name="quickcontact_bottom_frame"
-                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_bottom_frame.9.png"
-                qualifiers="hdpi-finger"
+                name="ic_action_settings"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-xxhdpi/ic_action_settings.png"
+                qualifiers="xxhdpi"
                 type="drawable" />
         </source>
         <source path="/home/raphael/proj/raumzeitstatus/android-widget/app/build/res/rs/debug" />

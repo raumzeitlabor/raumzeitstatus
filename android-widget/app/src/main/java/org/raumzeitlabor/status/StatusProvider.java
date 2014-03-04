@@ -21,8 +21,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -155,7 +160,7 @@ public class StatusProvider extends AppWidgetProvider {
         }
     }
 
-    class UpdateWidgetTask extends AsyncTask<Void, Void, Character> {
+    class UpdateWidgetTask extends AsyncTask<Void, Void, JSONObject> {
         private Context context = null;
         private Integer widgetId = null;
 
@@ -168,10 +173,10 @@ public class StatusProvider extends AppWidgetProvider {
         }
 
         @Override
-        protected Character doInBackground(Void... param) {
+        protected JSONObject doInBackground(Void... param) {
             Log.d(TAG, "Getting update from status.raumzeitlabor.de");
 
-            HttpGet request = new HttpGet("http://s.rzl.so/api/simple");
+            HttpGet request = new HttpGet("http://s.rzl.so/api/full.json");
             request.addHeader("Pragma", "no-cache");
             request.addHeader("Cache-Control", "no-cache");
             DefaultHttpClient client = new DefaultHttpClient();
@@ -183,22 +188,49 @@ public class StatusProvider extends AppWidgetProvider {
                     throw new Exception("HTTP Error");
                 }
                 InputStream stream = response.getEntity().getContent();
-                int firstByte = stream.read();
-                if (firstByte == -1)
-                    throw new Exception("Cannot read reply");
-                return (char)firstByte;
+                BufferedReader reader;
+                try {
+                    reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+                } catch (UnsupportedEncodingException e1) {
+                    reader = new BufferedReader(new InputStreamReader(stream));
+                }
+                StringBuilder sb = new StringBuilder();
+
+                String line = null;
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        sb.append((line + "\n"));
+                    }
+                } catch(Exception e){
+                    return null;
+                } finally {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                        return null;
+                    }
+                }
+                String json = sb.toString();
+                return new JSONObject(json);
             } catch (Exception e) {
                 e.printStackTrace();
-                return '!';
+                return null;
             }
         }
 
         @Override
-        protected void onPostExecute(Character result) {
+        protected void onPostExecute(JSONObject result) {
             Log.d(TAG, "result: " + result);
 
+            char simple_result;
+            try {
+                simple_result = result.getString("status").charAt(0);
+            } catch(Exception e) {
+                simple_result = '!';
+            }
+
             int resource;
-            switch (result) {
+            switch (simple_result) {
                 case '1': resource = R.drawable.auf; break;
                 case '0': resource = R.drawable.zu; break;
                 default:  resource = R.drawable.unklar;
@@ -220,7 +252,7 @@ public class StatusProvider extends AppWidgetProvider {
 
             /* Tell the WantConnectivityService that we want an update as soon
              * as there is network connectivity */
-            if (result == '!') {
+            if (simple_result == '!') {
                 Intent si = new Intent(context, WantConnectivityService.class);
                 si.putExtra("widgetId", widgetId);
                 context.startService(si);

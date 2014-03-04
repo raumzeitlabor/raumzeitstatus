@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -52,41 +53,14 @@ public class MenuPopup extends Activity {
         p.y = bounds.top;
         getWindow().setAttributes(p);
 
-        /* Inflate the action items */
-        ViewGroup mTrack = (ViewGroup)findViewById(R.id.tracks);
-
-        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        int index = 1;
-
-        /* Update now */
-        LinearLayout container = (LinearLayout)inflater.inflate(R.layout.action_item, null);
-        TextView text = (TextView)container.findViewById(R.id.title);
-        ImageView icon = (ImageView)container.findViewById(R.id.icon);
-        icon.setImageResource(R.drawable.ic_menu_refresh);
-        text.setText("Refresh");
-        container.setFocusable(true);
-        container.setClickable(true);
-        container.setOnClickListener(new OnClickListener() {
+        findViewById(R.id.refresh).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent i = StatusProvider.intentForWidget(mAppWidgetId, ".UPDATE");
                 sendBroadcast(i);
                 finish();
             }
         });
-        mTrack.addView(container, index);
-        index++;
-
-
-        /* Config */
-        container = (LinearLayout)inflater.inflate(R.layout.action_item, null);
-        icon = (ImageView)container.findViewById(R.id.icon);
-        icon.setImageResource(android.R.drawable.ic_menu_preferences);
-        text = (TextView)container.findViewById(R.id.title);
-        text.setText("Config");
-        container.setFocusable(true);
-        container.setClickable(true);
-        container.setOnClickListener(new OnClickListener() {
+        findViewById(R.id.settings).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Intent i = new Intent(MenuPopup.this, Configure.class);
                 i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
@@ -94,6 +68,22 @@ public class MenuPopup extends Activity {
                 finish();
             }
         });
-        mTrack.addView(container, index);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // If we've received a touch notification that the user has touched
+        // outside the app, finish the activity.
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams)getWindow().getAttributes();
+        if(event.getX() < p.x - 30 ||
+                event.getY() < p.y - 30 ||
+                event.getX() > p.x + p.width + 30 ||
+                event.getY() > p.y + p.height + 30) {
+            finish();
+            return false;
+        }
+
+        // Delegate everything else to Activity.
+        return super.onTouchEvent(event);
     }
 }
