@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger>
+
+    <dataSet config="main" >
+        <source path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res" >
+            <file
+                name="quickaction"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/quickaction.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="main"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/main.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="action_item"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/action_item.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="rzlstatus"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/layout/rzlstatus.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="grow_from_bottomleft_to_topright"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/grow_from_bottomleft_to_topright.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="shrink_from_bottom"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/shrink_from_bottom.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="shrink_from_topright_to_bottomleft"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/shrink_from_topright_to_bottomleft.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="rail"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/rail.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="grow_from_bottomright_to_topleft"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/grow_from_bottomright_to_topleft.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="grow_from_topright_to_bottomleft"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/grow_from_topright_to_bottomleft.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="grow_from_top"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/grow_from_top.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="grow_from_topleft_to_bottomright"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/grow_from_topleft_to_bottomright.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="shrink_from_bottomright_to_topleft"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/shrink_from_bottomright_to_topleft.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="grow_from_bottom"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/grow_from_bottom.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="shrink_from_top"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/shrink_from_top.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="shrink_from_bottomleft_to_topright"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/shrink_from_bottomleft_to_topright.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="shrink_from_topleft_to_bottomright"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/anim/shrink_from_topleft_to_bottomright.xml"
+                qualifiers=""
+                type="anim" />
+            <file
+                name="corners"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/corners.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="unklar"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/unklar.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="quickcontact_slider_btn"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/quickcontact_slider_btn.xml"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="zu"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/zu.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="auf"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable/auf.png"
+                qualifiers=""
+                type="drawable" />
+            <file
+                name="ic_menu_refresh"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi/ic_menu_refresh.png"
+                qualifiers="hdpi"
+                type="drawable" />
+            <file
+                name="preferences"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/xml/preferences.xml"
+                qualifiers=""
+                type="xml" />
+            <file
+                name="statusprovider"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/xml/statusprovider.xml"
+                qualifiers=""
+                type="xml" />
+            <file
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/values/styles.xml"
+                qualifiers="" >
+
+                <style name="Animations.PopUpMenu.Center" >
+                    <item name="@android:windowEnterAnimation">
+@anim/grow_from_bottom
+                    </item>
+                    <item name="@android:windowExitAnimation">
+@anim/shrink_from_top
+                    </item>
+                </style>
+
+                <style name="Animations.PopUpMenu" />
+
+                <style name="Animations" />
+
+                <style name="Animations.PopDownMenu" />
+
+                <style name="Animations.PopUpMenu.Left" >
+                    <item name="@android:windowEnterAnimation">
+@anim/grow_from_bottomleft_to_topright
+                    </item>
+                    <item name="@android:windowExitAnimation">
+@anim/shrink_from_topright_to_bottomleft
+                    </item>
+                </style>
+
+                <style name="Animations.PopDownMenu.Left" >
+                    <item name="@android:windowEnterAnimation">
+@anim/grow_from_topleft_to_bottomright
+                    </item>
+                    <item name="@android:windowExitAnimation">
+@anim/shrink_from_bottomright_to_topleft
+                    </item>
+                </style>
+
+                <style name="Animations.PopDownMenu.Center" >
+                    <item name="@android:windowEnterAnimation">
+@anim/grow_from_top
+                    </item>
+                    <item name="@android:windowExitAnimation">
+@anim/shrink_from_bottom
+                    </item>
+                </style>
+
+                <style name="Animations.PopUpMenu.Right" >
+                    <item name="@android:windowEnterAnimation">
+@anim/grow_from_bottomright_to_topleft
+                    </item>
+                    <item name="@android:windowExitAnimation">
+@anim/shrink_from_topleft_to_bottomright
+                    </item>
+                </style>
+
+                <style name="Animations.PopDownMenu.Right" >
+                    <item name="@android:windowEnterAnimation">
+@anim/grow_from_topright_to_bottomleft
+                    </item>
+                    <item name="@android:windowExitAnimation">
+@anim/shrink_from_bottomleft_to_topright
+                    </item>
+                </style>
+            </file>
+            <file
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/values/arrays.xml"
+                qualifiers="" >
+                <string-array name="intervalValues" >
+                    <item>
+900000
+                    </item>
+                    <item>
+1800000
+                    </item>
+                    <item>
+3600000
+                    </item>
+                    <item>
+43200000
+                    </item>
+                    <item>
+86400000
+                    </item>
+                </string-array>
+                <string-array name="intervalTitles" >
+                    <item>
+15 minutes
+                    </item>
+                    <item>
+30 minutes
+                    </item>
+                    <item>
+one hour
+                    </item>
+                    <item>
+12 hours
+                    </item>
+                    <item>
+one day
+                    </item>
+                </string-array>
+            </file>
+            <file
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/values/strings.xml"
+                qualifiers="" >
+                <string name="SYNC_TIME_DEFAULT" >--:--
+                </string>
+                <string name="app_name" >main
+                </string>
+                <string name="rzl_status_image" >RZL Status Image
+                </string>
+            </file>
+            <file
+                name="ic_menu_refresh"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-mdpi/ic_menu_refresh.png"
+                qualifiers="mdpi"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_btn_selected"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_selected.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_grip_left"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_grip_left.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_background"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_background.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_photo_frame"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_photo_frame.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_btn_on"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_on.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_arrow_up"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_arrow_up.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_top_frame"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_top_frame.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_arrow_down"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_arrow_down.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_disambig_divider"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_disambig_divider.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_disambig_bottom_bg"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_disambig_bottom_bg.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_drop_shadow"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_drop_shadow.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_btn_pressed"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_pressed.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_btn_normal"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_btn_normal.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_slider_grip_right"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_slider_grip_right.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+            <file
+                name="quickcontact_bottom_frame"
+                path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/drawable-hdpi-finger/quickcontact_bottom_frame.9.png"
+                qualifiers="hdpi-finger"
+                type="drawable" />
+        </source>
+        <source path="/home/raphael/proj/raumzeitstatus/android-widget/app/build/res/rs/debug" />
+        <source path="/home/raphael/proj/raumzeitstatus/android-widget/app/build/res/generated/debug" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/home/raphael/proj/raumzeitstatus/android-widget/app/src/debug/res" />
+    </dataSet>
+
+</merger>

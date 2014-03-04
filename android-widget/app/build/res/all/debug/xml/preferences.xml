@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory
+                android:title="Automatic refresh">
+                <CheckBoxPreference
+                        android:title="Automatic refresh"
+                        android:defaultValue="true"
+                        android:summary="Refresh status automatically"
+                        android:key="autoRefresh" />
+		<ListPreference
+                        android:title="Refresh interval"
+                        android:key="refreshInterval"
+                        android:defaultValue="900000"
+                        android:entries="@array/intervalTitles"
+                        android:entryValues="@array/intervalValues" />
+        </PreferenceCategory>
+	<!--
+        <PreferenceCategory
+                android:title="Notifications">
+                <CheckBoxPreference
+                        android:title="Enable notifications"
+                        android:defaultValue="false"
+                        android:summary="Show notification on status changes"
+                        android:key="enableNotification" />
+		<RingtonePreference
+			android:name="Notification Ringtone"
+			android:summary="Select a ringtone"
+			android:title="Ringtones"
+			android:key="ringtonePref" />
+	</PreferenceCategory>
+	-->
+</PreferenceScreen>
+<!-- From: file:/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/xml/preferences.xml -->
