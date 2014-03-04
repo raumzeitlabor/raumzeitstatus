@@ -3,14 +3,6 @@
  */
 package org.raumzeitlabor.status;
 
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpGet;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -24,6 +16,15 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.widget.RemoteViews;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class StatusProvider extends AppWidgetProvider {
     private static final String TAG = "rzlstatus";
@@ -173,7 +174,7 @@ public class StatusProvider extends AppWidgetProvider {
             HttpGet request = new HttpGet("http://s.rzl.so/api/simple");
             request.addHeader("Pragma", "no-cache");
             request.addHeader("Cache-Control", "no-cache");
-            AndroidHttpClient client = AndroidHttpClient.newInstance("");
+            DefaultHttpClient client = new DefaultHttpClient();
             try {
                 HttpResponse response = client.execute(request);
                 StatusLine statusLine = response.getStatusLine();
@@ -189,8 +190,6 @@ public class StatusProvider extends AppWidgetProvider {
             } catch (Exception e) {
                 e.printStackTrace();
                 return '!';
-            } finally {
-                client.close();
             }
         }
 
