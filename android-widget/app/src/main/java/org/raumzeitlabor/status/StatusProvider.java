@@ -36,6 +36,7 @@ public class StatusProvider extends AppWidgetProvider {
     private static final String URI_SCHEME = "rzlstatus";
     private static final String INTENT_PREFIX = "org.raumzeitlabor.status";
     private boolean firstUpdate = true;
+    private JSONObject data;
 
     public static Intent intentForWidget(int appWidgetId, String specificIntent) {
         Intent i = new Intent();
@@ -150,6 +151,8 @@ public class StatusProvider extends AppWidgetProvider {
                 Log.d(TAG, "bounds = " + intent.getSourceBounds());
                 Intent i = new Intent(context, MenuPopup.class);
                 i.putExtra("bounds", intent.getSourceBounds());
+                if(intent.hasExtra("result"))
+                    i.putExtra("result", intent.getStringExtra("result"));
                 i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
                 i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
@@ -222,6 +225,8 @@ public class StatusProvider extends AppWidgetProvider {
         protected void onPostExecute(JSONObject result) {
             Log.d(TAG, "result: " + result);
 
+            data = result;
+
             char simple_result;
             try {
                 simple_result = result.getString("status").charAt(0);
@@ -238,7 +243,9 @@ public class StatusProvider extends AppWidgetProvider {
 
             String time = new SimpleDateFormat("HH:mm").format(new Date());
             Intent i = intentForWidget(widgetId, ".CLICK");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
+            if(result != null)
+                i.putExtra("result", result.toString());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Log.d(TAG, "Pushing update");
             RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);

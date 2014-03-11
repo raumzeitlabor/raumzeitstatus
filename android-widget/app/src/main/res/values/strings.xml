@@ -2,5 +2,6 @@
 <resources>
     <string name="app_name">main</string>
     <string name="rzl_status_image">RZL Status Image</string>
+    <string name="names">Anwesend: %s</string>
     <string name="SYNC_TIME_DEFAULT">--:--</string>
 </resources>

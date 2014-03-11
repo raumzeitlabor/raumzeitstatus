@@ -21,6 +21,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MenuPopup extends Activity {
     private static final String TAG = "rzlstatus";
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
@@ -44,10 +48,10 @@ public class MenuPopup extends Activity {
 
         setContentView(R.layout.quickaction);
 
-        Rect bounds = (Rect)extras.get("bounds");
+        Rect bounds = (Rect) extras.get("bounds");
         Log.d(TAG, "start with bounds = " + bounds);
 
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams)getWindow().getAttributes();
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) getWindow().getAttributes();
         p.gravity = Gravity.LEFT | Gravity.TOP;
         p.x = (bounds.left + bounds.right) / 2;
         p.y = bounds.top;
@@ -68,14 +72,32 @@ public class MenuPopup extends Activity {
                 finish();
             }
         });
+        if (getIntent().hasExtra("result")) {
+            try {
+                JSONObject result = new JSONObject(getIntent().getStringExtra("result"));
+                StringBuilder people = new StringBuilder();
+                people.append("Anwesend: ");
+                JSONArray peopledetails = result.getJSONObject("details").getJSONArray("laboranten");
+                for (int i = 0; i < peopledetails.length(); i++) {
+                    if (i > 0)
+                        people.append(", ");
+                    people.append(peopledetails.get(i));
+                }
+                people.append("\nGeräte: ");
+                people.append(result.getJSONObject("details").getInt("geraete"));
+                ((TextView) findViewById(R.id.statustext)).setText(people.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // If we've received a touch notification that the user has touched
         // outside the app, finish the activity.
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams)getWindow().getAttributes();
-        if(event.getX() < p.x - 30 ||
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) getWindow().getAttributes();
+        if (event.getX() < p.x - 30 ||
                 event.getY() < p.y - 30 ||
                 event.getX() > p.x + p.width + 30 ||
                 event.getY() > p.y + p.height + 30) {

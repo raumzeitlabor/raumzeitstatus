@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<appwidget-provider
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:initialLayout="@layout/rzlstatus"
-  android:minWidth="40dp"
-  android:minHeight="40dp"
-/>
-<!-- From: file:/home/raphael/proj/raumzeitstatus/android-widget/app/src/main/res/xml/statusprovider.xml -->
