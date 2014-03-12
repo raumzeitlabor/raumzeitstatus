@@ -76,14 +76,17 @@ public class MenuPopup extends Activity {
             try {
                 JSONObject result = new JSONObject(getIntent().getStringExtra("result"));
                 StringBuilder people = new StringBuilder();
-                people.append("Anwesend: ");
                 JSONArray peopledetails = result.getJSONObject("details").getJSONArray("laboranten");
+                if (peopledetails.length() > 0)
+                    people.append("Anwesend: ");
                 for (int i = 0; i < peopledetails.length(); i++) {
                     if (i > 0)
                         people.append(", ");
                     people.append(peopledetails.get(i));
                 }
-                people.append("\nGeräte: ");
+                if (peopledetails.length() > 0)
+                    people.append("\n");
+                people.append("Geräte: ");
                 people.append(result.getJSONObject("details").getInt("geraete"));
                 ((TextView) findViewById(R.id.statustext)).setText(people.toString());
             } catch (JSONException e) {
