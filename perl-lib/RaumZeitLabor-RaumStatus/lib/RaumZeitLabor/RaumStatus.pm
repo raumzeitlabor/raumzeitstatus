@@ -15,6 +15,7 @@ sub d {
 }
 
 use Moose;
+no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 has url => (is => 'ro', default => 'http://s.rzl.so/api/stream/full.json');
 
