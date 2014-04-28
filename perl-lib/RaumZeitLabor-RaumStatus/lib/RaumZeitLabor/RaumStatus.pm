@@ -64,6 +64,11 @@ has part_cb => (
     handles => { register_part => 'push' },
 );
 
+has disconnect_cb => (
+    is => 'rw', @array_attr,
+    handles => { register_disconnect => 'push' },
+);
+
 around 'set_members' => sub {
     my ($orig, $self, $_members) = @_;
     my @members = sort @$_members;
@@ -117,7 +122,7 @@ sub BUILD {
     $self->_connect;
 }
 
-sub feed_jsonstring {
+sub _parse_json {
     my ($self, $data) = @_;
     my $pkt = eval { decode_json($data) };
     if (not $pkt) {
@@ -133,18 +138,20 @@ sub _connect {
     my $url = $self->url;
     state $reconnect;
     http_get $url, on_body => sub {
-        my ($data, $header) = @_;
-
+        my ($partial, $header) = @_;
         # it is a keep-alive packet, keep reading
-        return 1 if $data eq "\r\n";
+        return 1 if $partial eq "\r\n";
 
-        $self->feed_jsonstring($data);
+        $self->_parse_json($partial);
 
         return 1; # read more data
     }, sub {
-        warn "disconnected";
-        # connection is closed for whatever reason, open a new one after some delay
+        # connection closed for whatever reason, reconnect after a bit
+        warn 'disconnected from streaming RaumStatus API';
         $reconnect = AnyEvent->timer(after => 3, cb => sub { $self->_connect });
+        # invalidate members
+        $self->set_members([]);
+        $_->() for $self->disconnect_cb;
     };
 
     return;
