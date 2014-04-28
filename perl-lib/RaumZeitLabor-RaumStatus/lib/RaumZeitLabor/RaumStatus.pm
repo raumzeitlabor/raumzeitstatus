@@ -93,7 +93,7 @@ around 'set_members' => sub {
 
         if (@joined) {
             d("calling join_cb for: @joined");
-            $self->$_(@joined) for $self->join_cb;
+            $_->(@joined) for $self->join_cb;
         }
     }
 
@@ -110,7 +110,7 @@ around 'set_members' => sub {
             $member => AnyEvent->timer(after => $timeout, cb => sub {
                     $self->destroy_timeout($member);
                     d("calling part_cb for $member");
-                    $self->$_($member) for $self->part_cb;
+                    $_->($member) for $self->part_cb;
             }),
         );
     }
