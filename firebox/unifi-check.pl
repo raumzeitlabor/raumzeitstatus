@@ -7,9 +7,9 @@ use Carp;
 use Log::Log4perl qw/:easy/;
 use JSON::XS;
 use Time::Piece;
-use URL::Encode qw/url_encode_utf8/;
 use Data::Dumper;
 use AnyEvent::HTTP;
+use HTTP::Request::Common ();
 use MIME::Base64;
 
 use lib qw(.);
@@ -27,12 +27,23 @@ my $db = DBIx::Simple->connect(
 );
 
 my $UNIFI_CTRL = 'https://unifi.vm:8443';
+my $UNIFI_user = '';
+my $UNIFI_password = '';
 
 # login
 my $cv = AE::cv;
 my $cookiejar = {};
 
-my $login_body = 'login=Login&username=' .  url_encode_utf8('foo') . '&password=' . url_encode_utf8('bar');
+# create an 'application/x-www-form-urlencoded' body for AE::HTTP,
+# we only care for its ->content, the URL doesn't matter here.
+my $login_body = HTTP::Request::Common::POST('http://',
+    [
+        login => 'Login',
+        username => $UNIFI_user,
+        password => $UNIFI_password,
+    ]
+);
+
 my $login_request = http_request(
     POST       => "$UNIFI_CTRL/login",
     timeout    => 3,
@@ -40,7 +51,7 @@ my $login_request = http_request(
     persistent => 1,
     cookie_jar => $cookiejar,
     tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
-    body       => $login_body,
+    body       => $login_body->content,
     headers => {
         'Content-Type' => 'application/x-www-form-urlencoded',
     },
