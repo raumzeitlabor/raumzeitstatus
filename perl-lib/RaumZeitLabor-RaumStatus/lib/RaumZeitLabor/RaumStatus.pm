@@ -1,11 +1,10 @@
+package RaumZeitLabor::RaumStatus 0.2;
 use v5.14;
 use utf8;
-package RaumZeitLabor::RaumStatus 0.2;
 
 # not in core
 use AnyEvent::HTTP;
 use JSON::XS;
-use Method::Signatures::Simple;
 
 sub d {
     my $msg = scalar localtime;
@@ -39,7 +38,8 @@ has _members_timeout => (
     },
 );
 
-around 'members' => func ($orig, $self) {
+around 'members' => sub {
+    my ($orig, $self) = @_;
     my @m = $self->$orig();
     push @m, $self->members_timeout;
     return @m
@@ -63,7 +63,8 @@ has part_cb => (
     handles => { register_part => 'push' },
 );
 
-around 'set_members' => func ($orig, $self, $_members) {
+around 'set_members' => sub {
+    my ($orig, $self, $_members) = @_;
     my @members = sort @$_members;
     my @before = sort $self->_raw_members;
     my @timeouts = sort $self->members_timeout;
@@ -109,9 +110,14 @@ around 'set_members' => func ($orig, $self, $_members) {
     }
 };
 
-method BUILD { $self->_connect }
+sub BUILD {
+    my ($self) = @_;
 
-method feed_jsonstring ($data) {
+    $self->_connect;
+}
+
+sub feed_jsonstring {
+    my ($self, $data) = @_;
     my $pkt = eval { decode_json($data) };
     if (not $pkt) {
         d('bad json:', $data);
@@ -121,10 +127,13 @@ method feed_jsonstring ($data) {
     $self->set_members($members);
 }
 
-method _connect {
+sub _connect {
+    my ($self) = @_;
     my $url = $self->url;
     state $reconnect;
-    http_get $url, on_body => func ($data, $header) {
+    http_get $url, on_body => sub {
+        my ($data, $header) = @_;
+
         # it is a keep-alive packet, keep reading
         return 1 if $data eq "\r\n";
 

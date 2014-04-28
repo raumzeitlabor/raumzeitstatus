@@ -21,7 +21,6 @@ WriteMakefile(
     PREREQ_PM => {
         'AnyEvent::HTTP' => 0,
         'JSON::XS' => 0,
-        'Method::Signatures::Simple' => 0,
         'Moose' => 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
