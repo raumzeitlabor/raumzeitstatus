@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use v5.14;
 
 use Carp;
 use Log::Log4perl qw/:easy/;
@@ -32,48 +33,29 @@ my $UNIFI_password = '';
 
 # login
 my $cv = AE::cv;
-my $cookiejar = {};
 
-# create an 'application/x-www-form-urlencoded' body for AE::HTTP,
-# we only care for its ->content, the URL doesn't matter here.
-my $login_body = HTTP::Request::Common::POST('http://',
-    [
+unifi_request(
+    POST       => 'login',
+    recurse    => 0,
+    body_form_urlencoded(
         login => 'Login',
         username => $UNIFI_user,
         password => $UNIFI_password,
-    ]
-);
-
-my $login_request = http_request(
-    POST       => "$UNIFI_CTRL/login",
-    timeout    => 3,
-    recurse    => 0,
-    persistent => 1,
-    cookie_jar => $cookiejar,
-    tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
-    body       => $login_body->content,
-    headers => {
-        'Content-Type' => 'application/x-www-form-urlencoded',
-    },
+    ),
     sub {
-        my ($partial_body, $hdr) = @_;
+        my (undef, $hdr) = @_;
         $cv->send($hdr->{Status} == 302);
     }
 );
 
 croak('wrong credentials') unless $cv->recv;
-undef $login_request;
 
 INFO('logged in');
 
 # fetch stations
 $cv = AE::cv;
-my $station_request = http_request(
-    GET        => "$UNIFI_CTRL/api/stat/sta",
-    timeout    => 3,
-    persistent => 1,
-    cookie_jar => $cookiejar,
-    tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
+unifi_request(
+    GET        => 'api/stat/sta',
     sub {
         my ($body, $hdr) = @_;
         $cv->send(decode_json($body));
@@ -81,7 +63,7 @@ my $station_request = http_request(
 );
 
 my $stations = $cv->recv;
-undef $station_request;
+
 INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
 
 $db->begin_work;
@@ -129,9 +111,8 @@ my @laboranten = keys %{ { map { $_ => 1 } @tmp } };
 INFO('laboranten: ' . join ', ', @laboranten);
 
 $cv = AE::cv;
-my $logout_request = http_request(
-    GET        => "$UNIFI_CTRL/logout",
-    cookie_jar => $cookiejar,
+unifi_request(
+    GET        => 'logout',
     $cv
 );
 
@@ -165,3 +146,35 @@ http_post(
 );
 
 INFO('DONE (' . $done->recv . ')');
+
+# helper function for AE::HTTP::http_request.
+# takes a list of form parameters and returns a list
+# of 'body' and 'headers' arguments.
+sub body_form_urlencoded {
+    my (@form) = @_;
+
+    # the URL doesn't matter, because we only use the ->content
+    my $r = HTTP::Request::Common::POST('http://', \@form);
+
+    return (
+        body => $r->content,
+        headers => { 'Content-Type' => 'application/x-www-form-urlencoded' },
+    );
+}
+
+sub unifi_request {
+    my ($verb, $path, @request_args) = @_;
+
+    state $cookies = { };
+
+    http_request(
+        $verb => "$UNIFI_CTRL/$path",
+        timeout    => 3,
+        persistent => 1,
+        session    => 'unifi_session',
+        cookie_jar => $cookies,
+        tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
+        @request_args,
+    );
+}
+
