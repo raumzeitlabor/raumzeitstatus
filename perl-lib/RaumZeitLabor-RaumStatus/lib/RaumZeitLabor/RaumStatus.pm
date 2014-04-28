@@ -6,19 +6,10 @@ use utf8;
 use AnyEvent::HTTP;
 use JSON::XS;
 
-sub d {
-    my $msg = scalar localtime;
-    $msg .= ' ' . shift if @_ == 1;
-    $msg .= "\n\t" . join"\n\t", @_ if @_;
-    STDERR->print("$msg\n");
-    return;
-}
-
 use Moose;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 has url => (is => 'ro', default => 'http://s.rzl.so/api/stream/full.json');
-
 has door => (is => 'rw');
 
 my @array_attr = (
@@ -78,21 +69,19 @@ around 'set_members' => sub {
     # do nothing if nothing has changed
     return if @members ~~ @before;
 
-    d("set_member: @members",
-        "before: @before",
-        "timeouts: @timeouts");
+    $self->log(debug => "set_member: '@members' before: '@before' timeouts: '@timeouts'");
 
     $self->$orig(\@members);
 
     if (my @diff = grep { not $_ ~~ @before } @members) {
         my @joined = grep { not $_ ~~ @timeouts } @diff;
-        d("joined: @joined");
+        $self->log(debug => "joined: @joined");
 
         my @canceled_timeouts = grep { $_ ~~ @timeouts } @diff;
         $self->destroy_timeout($_) for @canceled_timeouts;
 
         if (@joined) {
-            d("calling join_cb for: @joined");
+            $self->log(debug => "calling join_cb for: @joined");
             $_->(@joined) for $self->join_cb;
         }
     }
@@ -105,16 +94,19 @@ around 'set_members' => sub {
                  @before;
     my $timeout = $self->flapping_timeout;
     for my $member (@parted) {
-        d("timeout, add timer for: $member");
+        $self->log(debug => "timeout, add timer for: $member");
         $self->add_timeout(
             $member => AnyEvent->timer(after => $timeout, cb => sub {
                     $self->destroy_timeout($member);
-                    d("calling part_cb for $member");
+                    $self->log(debug => "calling part_cb for $member");
                     $_->($member) for $self->part_cb;
             }),
         );
     }
 };
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 sub BUILD {
     my ($self) = @_;
@@ -126,7 +118,7 @@ sub _parse_json {
     my ($self, $data) = @_;
     my $pkt = eval { decode_json($data) };
     if (not $pkt) {
-        d('bad json:', $data);
+        $self->log(critical => 'bad json:', $data);
         return;
     }
     my $members = $pkt->{details}{laboranten} || [];
@@ -147,7 +139,7 @@ sub _connect {
         return 1; # read more data
     }, sub {
         # connection closed for whatever reason, reconnect after a bit
-        warn 'disconnected from streaming RaumStatus API';
+        $self->log(critical => 'disconnected from streaming RaumStatus API');
         $reconnect = AnyEvent->timer(after => 3, cb => sub { $self->_connect });
         # invalidate members
         $self->set_members([]);
@@ -157,6 +149,11 @@ sub _connect {
     return;
 }
 
-__PACKAGE__->meta->make_immutable;
+sub log {
+    my ($self, $level, $msg) = @_;
+    say "$level: $msg";
+    return;
+}
+
 1;
 # vim: set ts=4 sw=4 sts=4 expandtab: 
