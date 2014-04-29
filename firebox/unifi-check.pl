@@ -162,14 +162,19 @@ sub body_form_urlencoded {
 sub unifi_request {
     my ($verb, $path, @request_args) = @_;
 
-    state $cookies = { };
+    state %cookie_jar;
+    my $session = "unifi_session_$UNIFI_CTRL";
+    my $cookies = $cookie_jar{$session} ||= { };
 
     http_request(
         $verb => "$UNIFI_CTRL/$path",
         timeout    => 3,
         persistent => 1,
-        session    => 'unifi_session',
+        session    => $session,
         cookie_jar => $cookies,
+        # unifis' SSL implementation is broken, what we might want to do
+        # instead is: probe if they have implemented TLS in the mean
+        # time and fall back to sslv3 only after failing.
         tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
         @request_args,
     );
