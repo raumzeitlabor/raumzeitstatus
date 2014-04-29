@@ -80,26 +80,7 @@ for my $station (@{ $stations->{data} }) {
 
     push @macs, $station->{mac};
 
-    # TODO: handle multiple IPs
-    $db->insert(
-        'leases', {
-            ip             => $station->{ip},
-            mac            => $station->{mac},
-            ipv4_reachable => 1,
-            ipv6_reachable => 0,
-            hostname       => $station->{hostname}
-        }
-    );
-
-    # update last seen (TODO: ipv6)
-    $db->update(
-        'devices',
-        { lastseen => $station->{last_seen} },
-        {
-            mac => $station->{mac},
-            updatelastseen => 1
-        }
-    );
+    update_benutzerdb_lease($db, $station);
 }
 
 $db->commit;
@@ -143,6 +124,31 @@ http_post(
 );
 
 INFO('DONE (' . $done->recv . ')');
+
+sub update_benutzerdb_lease {
+    my ($db, $station) = @_;
+
+    # TODO: handle multiple IPs
+    $db->insert(
+        'leases', {
+            ip             => $station->{ip},
+            mac            => $station->{mac},
+            ipv4_reachable => 1,
+            ipv6_reachable => 0,
+            hostname       => $station->{hostname}
+        }
+    );
+
+    # update last seen (TODO: ipv6)
+    $db->update(
+        'devices',
+        { lastseen => $station->{last_seen} },
+        {
+            mac => $station->{mac},
+            updatelastseen => 1
+        }
+    );
+}
 
 # helper function for AE::HTTP::http_request.
 # takes a list of form parameters and returns a list
