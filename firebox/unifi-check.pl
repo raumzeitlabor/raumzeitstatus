@@ -14,33 +14,29 @@ use HTTP::Request::Common ();
 use MIME::Base64;
 
 use lib qw(.);
-use sqlconfig;
 use DBIx::Simple;
 use SQL::Abstract;
 
 $|++;
 Log::Log4perl->easy_init($DEBUG);
 
+my $CONFIG = load_config("$ENV{HOME}/raumstatus_config.json");
+
 my $db = DBIx::Simple->connect(
-    $sqlconfig::db,
-    $sqlconfig::user,
-    $sqlconfig::pass
+    $CONFIG->{db}{uri}, $CONFIG->{db}{user}, $CONFIG->{db}{pass}
 );
 
-my $UNIFI_CTRL = 'https://unifi.vm:8443';
-my $UNIFI_user = '';
-my $UNIFI_password = '';
+my $UNIFI_CTRL = $CONFIG->{unifi}{uri};
 
 # login
 my $cv = AE::cv;
-
 unifi_request(
     POST => 'login',
     recurse => 0,
     body_form_urlencoded(
         login => 'Login',
-        username => $UNIFI_user,
-        password => $UNIFI_password,
+        username => $CONFIG->{unifi}{user},
+        password => $CONFIG->{unifi}{pass}
     ),
     sub {
         my (undef, $hdr) = @_;
@@ -107,8 +103,10 @@ INFO('DONE (' . $done->recv . ')');
 
 sub post_status_update {
     my ($num_machines, @members) = @_;
-    my $username = 'bar';
-    my $password = 'foo';
+    my $username = $CONFIG->{status}{user};
+    my $password = $CONFIG->{status}{pass};
+    my $url = $CONFIG->{status}{uri};
+
     my $auth = 'Basic ' . MIME::Base64::encode("$username:$password", '');
 
     my $status_json = encode_json(
@@ -122,7 +120,7 @@ sub post_status_update {
 
     my $done = AnyEvent->condvar;
     http_post(
-        'https://status.raumzeitlabor.de/api/update',
+        $url,
         $status_json,
         headers => { Authorization => $auth },
         sub {
@@ -194,3 +192,22 @@ sub unifi_request {
     );
 }
 
+sub load_config {
+    my ($file) = @_;
+
+    open my $fh, '<', $file
+        or die "Could not open config file: $file\n";
+
+    my $config = decode_json(do { local $/; <$fh> });
+
+    for my $module (qw/unifi status db/) {
+        die "config for $module does not exist."
+            unless exists $config->{$module};
+
+        die "config for $module is incomplete"
+            unless 3 == grep { $config->{$module}{$_} }
+                            qw/uri user pass/;
+    }
+
+    return $config;
+}
