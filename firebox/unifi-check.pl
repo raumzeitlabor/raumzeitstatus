@@ -101,29 +101,37 @@ INFO('logged out');
 
 INFO('posting update');
 
-my $username = 'bar';
-my $password = 'foo';
-my $auth = 'Basic ' . MIME::Base64::encode("$username:$password", '');
-
-my $done = AnyEvent->condvar;
-http_post(
-    'https://status.raumzeitlabor.de/api/update',
-    encode_json(
-        {
-            details => {
-                geraete    => scalar @{ $stations->{data} },
-                laboranten => \@laboranten,
-            }
-        }
-    ),
-    headers => { Authorization => $auth },
-    sub {
-        my ($data, $headers) = @_;
-        $done->send($headers->{Status});
-    }
-);
+my $done = post_status_update(scalar @macs, @laboranten);
 
 INFO('DONE (' . $done->recv . ')');
+
+sub post_status_update {
+    my ($num_machines, @members) = @_;
+    my $username = 'bar';
+    my $password = 'foo';
+    my $auth = 'Basic ' . MIME::Base64::encode("$username:$password", '');
+
+    my $status_json = encode_json(
+        {
+            details => {
+                geraete    => $num_machines,
+                laboranten => \@members,
+            }
+        }
+    );
+
+    my $done = AnyEvent->condvar;
+    http_post(
+        'https://status.raumzeitlabor.de/api/update',
+        $status_json,
+        headers => { Authorization => $auth },
+        sub {
+            my ($data, $headers) = @_;
+            $done->send($headers->{Status});
+        }
+    );
+    return $done;
+}
 
 sub update_benutzerdb_lease {
     my ($db, $station) = @_;
