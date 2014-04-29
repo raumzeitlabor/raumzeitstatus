@@ -35,8 +35,8 @@ my $UNIFI_password = '';
 my $cv = AE::cv;
 
 unifi_request(
-    POST       => 'login',
-    recurse    => 0,
+    POST => 'login',
+    recurse => 0,
     body_form_urlencoded(
         login => 'Login',
         username => $UNIFI_user,
@@ -55,7 +55,7 @@ INFO('logged in');
 # fetch stations
 $cv = AE::cv;
 unifi_request(
-    GET        => 'api/stat/sta',
+    GET => 'api/stat/sta',
     sub {
         my ($body, $hdr) = @_;
         $cv->send(decode_json($body));
@@ -81,8 +81,8 @@ for my $station (@{ $stations->{data} }) {
     push @macs, $station->{mac} if (time - $station->{last_seen} < 60);    # XXX
 
     # TODO: handle multiple IPs
-    $db->insert('leases',
-        {
+    $db->insert(
+        'leases', {
             ip             => $station->{ip},
             mac            => $station->{mac},
             ipv4_reachable => (time - $station->{last_seen} < 60),         # XXX
@@ -92,10 +92,11 @@ for my $station (@{ $stations->{data} }) {
     );
 
     # update last seen (TODO: ipv6)
-    $db->update('devices',
+    $db->update(
+        'devices',
         { lastseen => $station->{last_seen} },
         {
-            mac            => $station->{mac},
+            mac => $station->{mac},
             updatelastseen => 1
         }
     );
@@ -111,12 +112,9 @@ my @laboranten = keys %{ { map { $_ => 1 } @tmp } };
 INFO('laboranten: ' . join ', ', @laboranten);
 
 $cv = AE::cv;
-unifi_request(
-    GET        => 'logout',
-    $cv
-);
-
+unifi_request(GET => 'logout', $cv);
 $cv->recv;
+
 INFO('logged out');
 
 INFO('posting update');
@@ -136,9 +134,7 @@ http_post(
             }
         }
     ),
-    headers => {
-        Authorization => $auth,
-    },
+    headers => { Authorization => $auth },
     sub {
         my ($data, $headers) = @_;
         $done->send($headers->{Status});
