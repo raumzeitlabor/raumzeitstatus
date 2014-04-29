@@ -16,6 +16,7 @@ use MIME::Base64;
 use lib qw(.);
 use sqlconfig;
 use DBIx::Simple;
+use SQL::Abstract;
 
 $|++;
 Log::Log4perl->easy_init($DEBUG);
