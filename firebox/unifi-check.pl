@@ -14,7 +14,6 @@ use HTTP::Request::Common ();
 use MIME::Base64;
 
 use lib qw(.);
-use user;
 use sqlconfig;
 use DBIx::Simple;
 
