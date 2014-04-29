@@ -104,11 +104,12 @@ for my $station (@{ $stations->{data} }) {
 
 $db->commit;
 
-my @tmp = $db->select('devices', 'handle', {
-    mac => { -in => \@macs }
-})->flat;
+my @laboranten = $db->select(
+    'devices', 'DISTINCT handle', {
+        mac => { -in => \@macs }
+    }
+)->flat;
 
-my @laboranten = keys %{ { map { $_ => 1 } @tmp } };
 INFO('laboranten: ' . join ', ', @laboranten);
 
 $cv = AE::cv;
