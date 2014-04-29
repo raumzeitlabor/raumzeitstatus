@@ -245,6 +245,7 @@ sub load_config {
     return $config;
 }
 
+1; # End of RaumZeitLabor::Status::Update
 __END__
 
 =head1 AUTHOR
@@ -331,4 +332,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
-1; # End of RaumZeitLabor::Status::Update
+# vim: set ts=4 sw=4 sts=4 expandtab:
