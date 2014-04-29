@@ -1,0 +1,17 @@
+{
+    "unifi" : {
+        "uri"  : "https://XXX:8443",
+        "user" : "",
+        "pass" : ""
+    },
+    "db" : {
+        "uri" : "dbi:mysql:database=XXX;host=XXX",
+        "user" : "",
+        "pass" : ""
+    },
+    "status" : {
+        "uri" : "https://status.raumzeitlabor.de/api/update",
+        "user" : "",
+        "pass" : ""
+    }
+}
