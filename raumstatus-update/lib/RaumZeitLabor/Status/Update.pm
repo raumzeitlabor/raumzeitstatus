@@ -46,70 +46,70 @@ my $db = DBIx::Simple->connect(
 
 my $UNIFI_CTRL = $CONFIG->{unifi}{uri};
 
-# login
-my $cv = AE::cv;
-unifi_request(
-    POST => 'login',
-    recurse => 0,
-    body_form_urlencoded(
-        login => 'Login',
-        username => $CONFIG->{unifi}{user},
-        password => $CONFIG->{unifi}{pass}
-    ),
-    sub {
-        my (undef, $hdr) = @_;
-        $cv->send($hdr->{Status} == 302);
-    }
-);
-
-croak('wrong credentials') unless $cv->recv;
-
-INFO('logged in');
-
-# fetch stations
-$cv = AE::cv;
-unifi_request(
-    GET => 'api/stat/sta',
-    sub {
-        my ($body, $hdr) = @_;
-        $cv->send(decode_json($body));
-    }
-);
-
-my $stations = $cv->recv;
-
-INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
-
-$db->begin_work;
-$db->query('DELETE FROM leases');
-
-for my $station (@{ $stations->{data} }) {
-    # first_seen, last_seen, uptime, oui, assoc_time
-    my $state = ($station->{powersave_enabled} ? 'SLEEPING' : '  ACTIVE');
-    INFO(sprintf '%10s | %8s | %25s | %12s | %8s',
-            $station->{mac}, $state, $station->{hostname},
-            $station->{ip}, $station->{oui}
+sub unifi_login {
+    my $cv = AE::cv;
+    unifi_request(
+        POST => 'login',
+        recurse => 0,
+        body_form_urlencoded(
+            login => 'Login',
+            username => $CONFIG->{unifi}{user},
+            password => $CONFIG->{unifi}{pass}
+        ),
+        sub {
+            my (undef, $hdr) = @_;
+            $cv->send($hdr->{Status} == 302);
+        }
     );
 
+    croak('wrong credentials') unless $cv->recv;
 
-    update_benutzerdb_lease($db, $station);
+    INFO('logged in');
 }
 
-$db->commit;
+sub unifi_stations {
+    $cv = AE::cv;
+    unifi_request(
+        GET => 'api/stat/sta',
+        sub {
+            my ($body, $hdr) = @_;
+            $cv->send(decode_json($body));
+        }
+    );
 
-$cv = AE::cv;
-unifi_request(GET => 'logout', $cv);
-$cv->recv;
+    my $stations = $cv->recv;
 
-INFO('logged out');
+    INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
 
-my $status = internal_status($db);
+    return $stations->{data};
+}
 
-INFO('posting update');
+sub update_leases {
+    my ($stations) = @_;
+    $db->begin_work;
+    $db->query('DELETE FROM leases');
 
-my $done = post_status_update($status);
+    for my $station (@$stations) {
+        # first_seen, last_seen, uptime, oui, assoc_time
+        my $state = ($station->{powersave_enabled} ? 'SLEEPING' : '  ACTIVE');
+        INFO(sprintf '%10s | %8s | %25s | %12s | %8s',
+                $station->{mac}, $state, $station->{hostname},
+                $station->{ip}, $station->{oui}
+        );
 
-INFO('DONE (' . $done->recv . ')');
+        update_benutzerdb_lease($db, $station);
+    }
+
+    $db->commit;
+}
+
+sub unifi_logout {
+    $cv = AE::cv;
+    unifi_request(GET => 'logout', $cv);
+    $cv->recv;
+
+    INFO('logged out');
+}
 
 sub internal_status {
     my ($db) = @_;
@@ -147,7 +147,10 @@ sub post_status_update {
 
     my $status_json = encode_json($status);
 
+    INFO('posting update');
+
     my $done = AnyEvent->condvar;
+
     http_post(
         $url,
         $status_json,
@@ -157,7 +160,8 @@ sub post_status_update {
             $done->send($headers->{Status});
         }
     );
-    return $done;
+
+    INFO('DONE (' . $done->recv . ')');
 }
 
 sub update_benutzerdb_lease {
