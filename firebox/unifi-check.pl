@@ -65,7 +65,6 @@ INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
 $db->begin_work;
 $db->query('DELETE FROM leases');
 
-my @macs = ();
 for my $station (@{ $stations->{data} }) {
     # first_seen, last_seen, uptime, oui, assoc_time
     my $state = ($station->{powersave_enabled} ? 'SLEEPING' : '  ACTIVE');
@@ -74,20 +73,11 @@ for my $station (@{ $stations->{data} }) {
             $station->{ip}, $station->{oui}
     );
 
-    push @macs, $station->{mac};
 
     update_benutzerdb_lease($db, $station);
 }
 
 $db->commit;
-
-my @laboranten = $db->select(
-    'devices', 'DISTINCT handle', {
-        mac => { -in => \@macs }
-    }
-)->flat;
-
-INFO('laboranten: ' . join ', ', @laboranten);
 
 $cv = AE::cv;
 unifi_request(GET => 'logout', $cv);
@@ -95,28 +85,49 @@ $cv->recv;
 
 INFO('logged out');
 
+my $status = internal_status($db);
+
 INFO('posting update');
 
-my $done = post_status_update(scalar @macs, @laboranten);
+my $done = post_status_update($status);
 
 INFO('DONE (' . $done->recv . ')');
 
+sub internal_status {
+    my ($db) = @_;
+    my @macs = $db->select(
+        'leases', 'mac', {
+            ipv4_reachable => 1
+        },
+    )->flat;
+
+    my @members = $db->select(
+        'devices', 'DISTINCT handle', {
+            mac => { -in => \@macs }
+        }
+    )->flat;
+
+    INFO('laboranten: ' . join ', ', @members);
+
+    my %status = (
+        details => {
+            geraete => scalar @macs,
+            laboranten => \@members,
+        }
+    );
+
+    return \%status;
+}
+
 sub post_status_update {
-    my ($num_machines, @members) = @_;
+    my ($status) = @_;
     my $username = $CONFIG->{status}{user};
     my $password = $CONFIG->{status}{pass};
     my $url = $CONFIG->{status}{uri};
 
     my $auth = 'Basic ' . MIME::Base64::encode("$username:$password", '');
 
-    my $status_json = encode_json(
-        {
-            details => {
-                geraete    => $num_machines,
-                laboranten => \@members,
-            }
-        }
-    );
+    my $status_json = encode_json($status);
 
     my $done = AnyEvent->condvar;
     http_post(
