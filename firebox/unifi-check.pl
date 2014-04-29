@@ -78,14 +78,14 @@ for my $station (@{ $stations->{data} }) {
             $station->{ip}, $station->{oui}
     );
 
-    push @macs, $station->{mac} if (time - $station->{last_seen} < 60);    # XXX
+    push @macs, $station->{mac};
 
     # TODO: handle multiple IPs
     $db->insert(
         'leases', {
             ip             => $station->{ip},
             mac            => $station->{mac},
-            ipv4_reachable => (time - $station->{last_seen} < 60),         # XXX
+            ipv4_reachable => 1,
             ipv6_reachable => 0,
             hostname       => $station->{hostname}
         }
