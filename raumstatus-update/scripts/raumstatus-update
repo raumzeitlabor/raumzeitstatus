@@ -2,7 +2,8 @@
 use strict; use warnings;
 use v5.14;
 
-use if -d 'lib', 'lib', 'lib';
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 
 use RaumZeitLabor::Status::Update;
 
