@@ -53,12 +53,23 @@ sub run {
     unifi_login(AE::cv)->recv;
 
     if (my $stations = unifi_stations(AE::cv)->recv) {
+        station_debuginfo($_) for @$stations;
         update_leases($db, $stations);
 
         my $status = internal_status($db);
         post_status_update($status)->recv;
     }
 
+}
+
+sub station_debuginfo {
+    my ($station) = @_;
+    # first_seen, last_seen, uptime, oui, assoc_time
+    my $state = ($station->{powersave_enabled} ? 'SLEEPING' : 'ACTIVE');
+    INFO(sprintf '%10s | %8s | %25s | %13s | %8s',
+            $station->{mac}, $state, $station->{hostname},
+            $station->{ip}, $station->{oui}
+    );
 }
 
 sub unifi_login {
@@ -112,13 +123,6 @@ sub update_leases {
     $db->query('DELETE FROM leases');
 
     for my $station (@$stations) {
-        # first_seen, last_seen, uptime, oui, assoc_time
-        my $state = ($station->{powersave_enabled} ? 'SLEEPING' : '  ACTIVE');
-        INFO(sprintf '%10s | %8s | %25s | %12s | %8s',
-                $station->{mac}, $state, $station->{hostname},
-                $station->{ip}, $station->{oui}
-        );
-
         update_benutzerdb_lease($db, $station);
     }
 
