@@ -7,8 +7,13 @@ use warnings FATAL => 'all';
 use Carp;
 use Time::Piece;
 
+use EV;
 use Coro;
 use AnyEvent;
+# initialize AnyEvent as soon as possible to make
+# sure integration of EV/Coro/AnyEvent works as expected.
+BEGIN { AnyEvent::detect; }
+
 use AnyEvent::HTTP;
 
 use Log::Log4perl qw/:easy/;
