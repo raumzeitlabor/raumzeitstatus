@@ -7,11 +7,15 @@ use warnings FATAL => 'all';
 use Carp;
 use Time::Piece;
 
+use Coro;
+use AnyEvent;
+use AnyEvent::HTTP;
+
 use Log::Log4perl qw/:easy/;
 use JSON::XS;
-use AnyEvent::HTTP;
 use HTTP::Request::Common ();
 use MIME::Base64;
+
 use DBIx::Simple;
 use SQL::Abstract;
 
@@ -48,24 +52,18 @@ sub connect_db {
     );
 }
 sub run {
-    my $finished = AE::cv;
+    my $db = connect_db();
 
-    unifi_login(sub {
-        my $db = connect_db();
+    unifi_login();
 
-        unifi_stations(sub {
-            my ($stations) = @_;
+    my $stations = unifi_stations();
 
-            station_debuginfo($_) for @$stations;
-            update_leases($db, $stations);
+    station_debuginfo($_) for @$stations;
+    update_leases($db, $stations);
 
-            my $status = internal_status($db);
+    my $status = internal_status($db);
 
-            post_status_update($status, $finished);
-        });
-    });
-
-    return $finished;
+    post_status_update($status);
 }
 
 sub station_debuginfo {
@@ -81,52 +79,42 @@ sub station_debuginfo {
 sub unifi_login {
     my ($cb) = @_;
 
-    unifi_request(
+    my (undef, $hdr) = unifi_request(
         POST => 'login',
         recurse => 0,
         body_form_urlencoded(
             login => 'Login',
             username => $CONFIG->{unifi}{user},
             password => $CONFIG->{unifi}{pass},
-        ),
-        sub {
-            my (undef, $hdr) = @_;
-
-            if ($hdr->{Status} == 302 and
-                $hdr->{location} eq "$UNIFI_CTRL/manage/s/default")
-            {
-                INFO('logged in');
-            }
-            # unifi returns status code 200 if our credentials are incorrect
-            else {
-                croak('wrong credentials');
-            }
-            $cb->($hdr);
-        }
+        )
     );
 
+    if ($hdr->{Status} == 302 and
+        $hdr->{location} eq "$UNIFI_CTRL/manage/s/default")
+    {
+        INFO('logged in');
+    }
+    # unifi returns status code 200 if our credentials are incorrect
+    else {
+        croak('wrong credentials');
+    }
 }
 
 sub unifi_stations {
-    my ($cb) = @_;
-
     state $json = JSON::XS->new->ascii;
 
-    unifi_request(
-        POST => 'api/stat/sta',
-        sub {
-            my ($body, $hdr) = @_;
+    my ($body, $hdr) = unifi_request(POST => 'api/stat/sta');
 
-            my $stations;
-            if ($hdr->{Status} == 200 and
-                $hdr->{'content-type'} eq 'application/json;charset=ISO-8859-1')
-            {
-                $stations = $json->decode($body)->{data};
-                INFO(scalar @$stations . ' stations connected to AP');
-                $cb->($stations);
-            }
-        }
-    );
+    my $stations;
+    if ($hdr->{Status} == 200 and
+        $hdr->{'content-type'} eq 'application/json;charset=ISO-8859-1')
+    {
+        $stations = $json->decode($body)->{data};
+        INFO(scalar @$stations . ' stations connected to AP');
+        return $stations;
+    }
+
+    return;
 }
 
 sub update_leases {
@@ -188,19 +176,18 @@ sub post_status_update {
 
     INFO('posting update');
 
+    my $wait = Coro::rouse_cb;
+
     http_post(
         $url,
         $status_json,
         headers => { Authorization => $auth },
-        sub {
-            my ($data, $headers) = @_;
-            INFO('DONE (' . $headers->{Status} . ')');
-            $done->send([ @_ ]);
-        }
+        $wait
     );
 
-    return $done;
+    my ($data, $headers) = Coro::rouse_wait($wait);
 
+    INFO('DONE (' . $headers->{Status} . ')');
 }
 
 sub update_benutzerdb_lease {
@@ -250,6 +237,8 @@ sub unifi_request {
     my $session = "unifi_session_$UNIFI_CTRL";
     my $cookies = $cookie_jar{$session} ||= { };
 
+    my $wait = Coro::rouse_cb;
+
     http_request(
         $verb => "$UNIFI_CTRL/$path",
         # never time out this connection,
@@ -264,7 +253,10 @@ sub unifi_request {
         # time and fall back to sslv3 only after failing.
         tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
         @request_args,
+        $wait
     );
+
+    return Coro::rouse_wait($wait);
 }
 
 sub load_config {
