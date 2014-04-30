@@ -1,0 +1,11 @@
+#!/usr/bin/env perl
+use strict; use warnings;
+use v5.14;
+
+use if -d 'lib', 'lib', 'lib';
+
+use RaumZeitLabor::Status::Update;
+
+RaumZeitLabor::Status::Update->run;
+
+# vim: set ts=4 sw=4 sts=4 expandtab:

@@ -40,14 +40,29 @@ Log::Log4perl->easy_init($DEBUG);
 
 my $CONFIG = load_config("$ENV{HOME}/raumstatus_config.json");
 
-my $db = DBIx::Simple->connect(
-    $CONFIG->{db}{uri}, $CONFIG->{db}{user}, $CONFIG->{db}{pass}
-);
-
 my $UNIFI_CTRL = $CONFIG->{unifi}{uri};
 
+sub connect_db {
+    return DBIx::Simple->connect(
+        $CONFIG->{db}{uri}, $CONFIG->{db}{user}, $CONFIG->{db}{pass}
+    );
+}
+sub run {
+    my $db = connect_db();
+
+    unifi_login(AE::cv)->recv;
+
+    if (my $stations = unifi_stations(AE::cv)->recv) {
+        update_leases($db, $stations);
+
+        my $status = internal_status($db);
+        post_status_update($status)->recv;
+    }
+
+}
+
 sub unifi_login {
-    my $cv = AE::cv;
+    my ($cv) = @_;
     unifi_request(
         POST => 'login',
         recurse => 0,
@@ -58,34 +73,41 @@ sub unifi_login {
         ),
         sub {
             my (undef, $hdr) = @_;
-            $cv->send($hdr->{Status} == 302);
+            if ($hdr->{Status} == 302) {
+                INFO('logged in');
+            }
+            else {
+                croak('wrong credentials');
+            }
+            $cv->send($hdr);
         }
     );
 
-    croak('wrong credentials') unless $cv->recv;
-
-    INFO('logged in');
+    return $cv;
 }
 
 sub unifi_stations {
-    $cv = AE::cv;
+    my ($cv) = @_;
+
     unifi_request(
         GET => 'api/stat/sta',
         sub {
             my ($body, $hdr) = @_;
-            $cv->send(decode_json($body));
+            my $stations;
+            if ($hdr->{Status} == 200) {
+                $stations = decode_json($body);
+                INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
+            }
+
+            $cv->send($stations->{data});
         }
     );
 
-    my $stations = $cv->recv;
-
-    INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
-
-    return $stations->{data};
+    return $cv;
 }
 
 sub update_leases {
-    my ($stations) = @_;
+    my ($db, $stations) = @_;
     $db->begin_work;
     $db->query('DELETE FROM leases');
 
@@ -104,11 +126,12 @@ sub update_leases {
 }
 
 sub unifi_logout {
-    $cv = AE::cv;
-    unifi_request(GET => 'logout', $cv);
-    $cv->recv;
-
-    INFO('logged out');
+    my ($cv) = @_;
+    unifi_request(GET => 'logout', sub {
+        INFO('logged out');
+        $cv->send([ @_ ]);
+    });
+    return $cv;
 }
 
 sub internal_status {
@@ -157,11 +180,13 @@ sub post_status_update {
         headers => { Authorization => $auth },
         sub {
             my ($data, $headers) = @_;
-            $done->send($headers->{Status});
+            INFO('DONE (' . $headers->{Status} . ')');
+            $done->send([ @_ ]);
         }
     );
 
-    INFO('DONE (' . $done->recv . ')');
+    return $done;
+
 }
 
 sub update_benutzerdb_lease {
@@ -213,7 +238,10 @@ sub unifi_request {
 
     http_request(
         $verb => "$UNIFI_CTRL/$path",
-        timeout    => 3,
+        # never time out this connection,
+        # we want to keep reusing it as long as possible
+        timeout    => 0,
+
         persistent => 1,
         session    => $session,
         cookie_jar => $cookies,
