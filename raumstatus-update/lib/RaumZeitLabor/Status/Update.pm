@@ -80,13 +80,17 @@ sub unifi_login {
         body_form_urlencoded(
             login => 'Login',
             username => $CONFIG->{unifi}{user},
-            password => $CONFIG->{unifi}{pass}
+            password => $CONFIG->{unifi}{pass},
         ),
         sub {
             my (undef, $hdr) = @_;
-            if ($hdr->{Status} == 302) {
+
+            if ($hdr->{Status} == 302 and
+                $hdr->{location} eq "$UNIFI_CTRL/manage/s/default")
+            {
                 INFO('logged in');
             }
+            # unifi returns status code 200 if our credentials are incorrect
             else {
                 croak('wrong credentials');
             }
@@ -100,17 +104,22 @@ sub unifi_login {
 sub unifi_stations {
     my ($cv) = @_;
 
+    state $json = JSON::XS->new->ascii;
+
     unifi_request(
-        GET => 'api/stat/sta',
+        POST => 'api/stat/sta',
         sub {
             my ($body, $hdr) = @_;
+
             my $stations;
-            if ($hdr->{Status} == 200) {
-                $stations = decode_json($body);
-                INFO(scalar @{ $stations->{data} } . ' stations connected to AP');
+            if ($hdr->{Status} == 200 and
+                $hdr->{'content-type'} eq 'application/json;charset=ISO-8859-1')
+            {
+                $stations = $json->decode($body)->{data};
+                INFO(scalar @$stations . ' stations connected to AP');
             }
 
-            $cv->send($stations->{data});
+            $cv->send($stations);
         }
     );
 
