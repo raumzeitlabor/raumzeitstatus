@@ -7,6 +7,6 @@ use lib "$FindBin::Bin/../lib";
 
 use RaumZeitLabor::Status::Update;
 
-RaumZeitLabor::Status::Update->run;
+RaumZeitLabor::Status::Update->run->recv;
 
 # vim: set ts=4 sw=4 sts=4 expandtab:

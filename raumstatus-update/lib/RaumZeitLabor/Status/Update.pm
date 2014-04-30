@@ -48,18 +48,24 @@ sub connect_db {
     );
 }
 sub run {
-    my $db = connect_db();
+    my $finished = AE::cv;
 
-    unifi_login(AE::cv)->recv;
+    unifi_login(sub {
+        my $db = connect_db();
 
-    if (my $stations = unifi_stations(AE::cv)->recv) {
-        station_debuginfo($_) for @$stations;
-        update_leases($db, $stations);
+        unifi_stations(sub {
+            my ($stations) = @_;
 
-        my $status = internal_status($db);
-        post_status_update($status)->recv;
-    }
+            station_debuginfo($_) for @$stations;
+            update_leases($db, $stations);
 
+            my $status = internal_status($db);
+
+            post_status_update($status, $finished);
+        });
+    });
+
+    return $finished;
 }
 
 sub station_debuginfo {
@@ -73,7 +79,8 @@ sub station_debuginfo {
 }
 
 sub unifi_login {
-    my ($cv) = @_;
+    my ($cb) = @_;
+
     unifi_request(
         POST => 'login',
         recurse => 0,
@@ -94,15 +101,14 @@ sub unifi_login {
             else {
                 croak('wrong credentials');
             }
-            $cv->send($hdr);
+            $cb->($hdr);
         }
     );
 
-    return $cv;
 }
 
 sub unifi_stations {
-    my ($cv) = @_;
+    my ($cb) = @_;
 
     state $json = JSON::XS->new->ascii;
 
@@ -117,13 +123,10 @@ sub unifi_stations {
             {
                 $stations = $json->decode($body)->{data};
                 INFO(scalar @$stations . ' stations connected to AP');
+                $cb->($stations);
             }
-
-            $cv->send($stations);
         }
     );
-
-    return $cv;
 }
 
 sub update_leases {
@@ -174,7 +177,7 @@ sub internal_status {
 }
 
 sub post_status_update {
-    my ($status) = @_;
+    my ($status, $done) = @_;
     my $username = $CONFIG->{status}{user};
     my $password = $CONFIG->{status}{pass};
     my $url = $CONFIG->{status}{uri};
@@ -184,8 +187,6 @@ sub post_status_update {
     my $status_json = encode_json($status);
 
     INFO('posting update');
-
-    my $done = AnyEvent->condvar;
 
     http_post(
         $url,
