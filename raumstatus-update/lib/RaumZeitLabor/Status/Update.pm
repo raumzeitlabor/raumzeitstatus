@@ -129,15 +129,6 @@ sub update_leases {
     $db->commit;
 }
 
-sub unifi_logout {
-    my ($cv) = @_;
-    unifi_request(GET => 'logout', sub {
-        INFO('logged out');
-        $cv->send([ @_ ]);
-    });
-    return $cv;
-}
-
 sub internal_status {
     my ($db) = @_;
     my @macs = $db->select(
