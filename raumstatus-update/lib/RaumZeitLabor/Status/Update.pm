@@ -259,7 +259,10 @@ sub load_config {
     open my $fh, '<', $file
         or die "Could not open config file: $file\n";
 
-    my $config = decode_json(do { local $/; <$fh> });
+    # allow comments and trailing commata in lists
+    my $json = JSON::XS->new->relaxed(1);
+
+    my $config = $json->decode(do { local $/; <$fh> });
 
     for my $module (qw/unifi status db/) {
         die "config for $module does not exist."
