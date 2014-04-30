@@ -4,6 +4,8 @@ use 5.014;
 use strict;
 use warnings FATAL => 'all';
 
+use RaumZeitLabor::Status::BenutzerDB;
+
 use Carp;
 use Time::Piece;
 
@@ -20,9 +22,6 @@ use Log::Log4perl qw/:easy/;
 use JSON::XS;
 use HTTP::Request::Common ();
 use MIME::Base64;
-
-use DBIx::Simple;
-use SQL::Abstract;
 
 =head1 NAME
 
@@ -51,22 +50,17 @@ my $CONFIG = load_config("$ENV{HOME}/raumstatus_config.json");
 
 my $UNIFI_CTRL = $CONFIG->{unifi}{uri};
 
-sub connect_db {
-    return DBIx::Simple->connect(
-        $CONFIG->{db}{uri}, $CONFIG->{db}{user}, $CONFIG->{db}{pass}
-    );
-}
 sub run {
-    my $db = connect_db();
+    my $db = RaumZeitLabor::Status::BenutzerDB->new(config => $CONFIG->{db});
 
     unifi_login();
 
     my $stations = unifi_stations();
 
     station_debuginfo($_) for @$stations;
-    update_leases($db, $stations);
+    $db->update_leases($stations);
 
-    my $status = internal_status($db);
+    my $status = $db->internal_status;
 
     post_status_update($status);
 }
@@ -122,44 +116,6 @@ sub unifi_stations {
     return;
 }
 
-sub update_leases {
-    my ($db, $stations) = @_;
-    $db->begin_work;
-    $db->query('DELETE FROM leases');
-
-    for my $station (@$stations) {
-        update_benutzerdb_lease($db, $station);
-    }
-
-    $db->commit;
-}
-
-sub internal_status {
-    my ($db) = @_;
-    my @macs = $db->select(
-        'leases', 'mac', {
-            ipv4_reachable => 1
-        },
-    )->flat;
-
-    my @members = $db->select(
-        'devices', 'DISTINCT handle', {
-            mac => { -in => \@macs }
-        }
-    )->flat;
-
-    INFO('laboranten: ' . join ', ', @members);
-
-    my %status = (
-        details => {
-            geraete => scalar @macs,
-            laboranten => \@members,
-        }
-    );
-
-    return \%status;
-}
-
 sub post_status_update {
     my ($status, $done) = @_;
     my $username = $CONFIG->{status}{user};
@@ -184,31 +140,6 @@ sub post_status_update {
     my ($data, $headers) = Coro::rouse_wait($wait);
 
     INFO('DONE (' . $headers->{Status} . ')');
-}
-
-sub update_benutzerdb_lease {
-    my ($db, $station) = @_;
-
-    # TODO: handle multiple IPs
-    $db->insert(
-        'leases', {
-            ip             => $station->{ip},
-            mac            => $station->{mac},
-            ipv4_reachable => 1,
-            ipv6_reachable => 0,
-            hostname       => $station->{hostname}
-        }
-    );
-
-    # update last seen (TODO: ipv6)
-    $db->update(
-        'devices',
-        { lastseen => $station->{last_seen} },
-        {
-            mac => $station->{mac},
-            updatelastseen => 1
-        }
-    );
 }
 
 # helper function for AE::HTTP::http_request.
