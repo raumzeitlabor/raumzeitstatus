@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 
 use RaumZeitLabor::Status::BenutzerDB;
 use RaumZeitLabor::Status::Update;
+use RaumZeitLabor::Status::Unifi;
 
 use EV;
 use Coro;
@@ -13,6 +14,8 @@ use AnyEvent;
 # initialize AnyEvent as soon as possible to make
 # sure integration of EV/Coro/AnyEvent works as expected.
 BEGIN { AnyEvent::detect; }
+
+use Moo;
 
 has 'config' => (
     is => 'ro',
@@ -46,16 +49,17 @@ sub run {
         config => $self->config->{db}
     );
 
-    RaumZeitLabor::Status::Update::unifi_login();
+    my $unifi = RaumZeitLabor::Status::Unifi->new(config => $self->config->{unifi});
+    $unifi->login;
 
-    my $stations = RaumZeitLabor::Status::Update::unifi_stations();
+    my $stations = $unifi->list_stations;
 
-    RaumZeitLabor::Status::Update::station_debuginfo($_) for @$stations;
+    $unifi->station_debuginfo($_) for @$stations;
     $db->update_leases($stations);
 
     my $status = $db->internal_status;
 
-    RaumZeitLabor::Status::Update::post_status_update($status);
+    # RaumZeitLabor::Status::Update::post_status_update($status);
 }
 
 sub _load_config {
