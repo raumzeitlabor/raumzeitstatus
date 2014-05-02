@@ -15,7 +15,10 @@ has 'db' => (
     builder => '_build_db_connection',
 );
 
-has 'config' => (is => 'ro');
+has 'config' => (
+    is => 'ro',
+    default => sub { $raumstatusd::Instance->config->{db} },
+);
 
 sub _build_db_connection {
     my ($self) = @_;

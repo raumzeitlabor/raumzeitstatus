@@ -2,9 +2,14 @@
 use 5.014;
 use strict;
 use warnings FATAL => 'all';
+
 use Test::More;
+use Test::MockObject;
+
 use AnyEvent::HTTPD;
 use JSON::XS;
+
+use Coro;
 
 BEGIN {
     use_ok( 'raumstatusd::Unifi' ) || print "Bail out!\n";
@@ -45,9 +50,26 @@ $httpd->reg_cb(
 my $config = { uri => "http://localhost:$port", user => '', pass => '' };
 
 my $unifi = raumstatusd::Unifi->new(config => $config);
+# XXX
 $unifi->login;
 
 is_deeply($unifi->list_stations, $station_json->{data}, 'list_stations');
 is_deeply($unifi->list_dynamic_macs, [ $expected->{mac} ], 'list_dynamic_macs');
+
+my $channel = Coro::Channel->new(1);
+$raumzeitstatusd::Instance =
+    Test::MockObject->new->set_always('main_queue', $channel);
+
+$unifi->interval(0.01);
+$unifi->run;
+
+isa_ok($channel->get, 'raumstatusd::Unifi::Event', 'queue->get 1');
+my $e = $channel->get;
+isa_ok($e, 'raumstatusd::Unifi::Event', 'queue->get 2');
+
+is_deeply($e->macs, [ $expected->{mac} ], 'event->macs');
+
+
+
 
 done_testing;

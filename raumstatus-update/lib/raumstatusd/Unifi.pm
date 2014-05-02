@@ -7,6 +7,7 @@ use warnings FATAL => 'all';
 use Carp;
 
 use Coro;
+use Coro::AnyEvent;
 use AnyEvent::HTTP;
 
 use Log::Log4perl qw/:easy/;
@@ -17,9 +18,41 @@ Log::Log4perl->easy_init($DEBUG);
 
 use Moo;
 
+package raumstatusd::Unifi::Event {
+    use Moo;
+
+    has macs => (is => 'ro');
+}
+
 has 'config' => (
     is => 'ro',
+    default => sub { $raumstatusd::Instance->config->{unifi} },
 );
+
+has 'interval' => (
+    is => 'rw',
+    default => sub { 60 },
+);
+
+sub run {
+    my ($self) = @_;
+
+    async {
+        $self->login;
+
+        while (1) {
+            my $macs = $self->list_dynamic_macs;
+            my $e = raumstatusd::Unifi::Event->new(macs => $macs);
+
+            $raumzeitstatusd::Instance->main_queue->put($e);
+
+            Coro::AnyEvent::sleep($self->interval);
+        }
+    };
+
+    return $self;
+}
+
 
 sub station_debuginfo {
     my ($self, $station) = @_;
@@ -62,12 +95,13 @@ sub matches_dynamic_ip {
 }
 
 sub list_dynamic_macs {
-    my ($self, @macs) = @_;
+    my ($self) = @_;
 
     my $stations = $self->list_stations;
     my @dynamic = grep { $self->matches_dynamic_ip($_->{ip}) } @$stations;
 
-    return grep { $_->{mac} } @dynamic;
+    my @macs = map { $_->{mac} } @dynamic;
+    return \@macs;
 }
 
 sub list_stations {
@@ -83,7 +117,7 @@ sub list_stations {
         $stations = $json->decode($body)->{data};
 
         INFO(scalar @$stations . ' stations connected to AP');
-        return @$stations;
+        return $stations;
     }
 
     return;

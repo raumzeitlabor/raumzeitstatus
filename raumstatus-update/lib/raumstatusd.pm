@@ -4,6 +4,8 @@ use 5.014;
 use strict;
 use warnings FATAL => 'all';
 
+our $Instance;
+
 use raumstatusd::BenutzerDB;
 use raumstatusd::Update;
 use raumstatusd::Unifi;
@@ -20,6 +22,11 @@ use Moo;
 has 'config' => (
     is => 'ro',
     default => sub { _load_config("$ENV{HOME}/raumstatus_config.json") },
+);
+
+has 'main_queue' => (
+    is => 'ro',
+    default => sub { Coro::Channel->new },
 );
 
 =head1 NAME
@@ -45,21 +52,18 @@ Perhaps a little code snippet.
 
 sub run {
     my ($self) = @_;
-    my $db = raumstatusd::BenutzerDB->new(
-        config => $self->config->{db}
-    );
+    $Instance = $self;
 
-    my $unifi = raumstatusd::Unifi->new(config => $self->config->{unifi});
-    $unifi->login;
+    my $db = raumstatusd::BenutzerDB->new;
 
-    my $stations = $unifi->list_stations;
+    my $unifi = raumstatusd::Unifi->new->run;
 
-    $unifi->station_debuginfo($_) for @$stations;
-    $db->update_leases($stations);
+    while (my $event = $self->main_queue->get) {
+        if ($event->isa('raumstatusd::Unifi::Event')) {
+            say "macs: @{ $event->macs }"
+        }
+    }
 
-    my $status = $db->internal_status;
-
-    # raumstatusd::Update::post_status_update($status);
 }
 
 sub _load_config {
