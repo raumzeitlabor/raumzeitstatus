@@ -1,4 +1,4 @@
-package RaumZeitLabor::Status::BenutzerDB;
+package raumstatusd::BenutzerDB;
 
 use strict; use warnings;
 use v5.14;

@@ -1,12 +1,12 @@
-package RaumZeitLabor::Status;
+package raumstatusd;
 
 use 5.014;
 use strict;
 use warnings FATAL => 'all';
 
-use RaumZeitLabor::Status::BenutzerDB;
-use RaumZeitLabor::Status::Update;
-use RaumZeitLabor::Status::Unifi;
+use raumstatusd::BenutzerDB;
+use raumstatusd::Update;
+use raumstatusd::Unifi;
 
 use EV;
 use Coro;
@@ -24,7 +24,7 @@ has 'config' => (
 
 =head1 NAME
 
-RaumZeitLabor::Status - The great new RaumZeitLabor::Status!
+raumstatusd - The great new raumstatusd!
 
 =head1 VERSION
 
@@ -45,11 +45,11 @@ Perhaps a little code snippet.
 
 sub run {
     my ($self) = @_;
-    my $db = RaumZeitLabor::Status::BenutzerDB->new(
+    my $db = raumstatusd::BenutzerDB->new(
         config => $self->config->{db}
     );
 
-    my $unifi = RaumZeitLabor::Status::Unifi->new(config => $self->config->{unifi});
+    my $unifi = raumstatusd::Unifi->new(config => $self->config->{unifi});
     $unifi->login;
 
     my $stations = $unifi->list_stations;
@@ -59,7 +59,7 @@ sub run {
 
     my $status = $db->internal_status;
 
-    # RaumZeitLabor::Status::Update::post_status_update($status);
+    # raumstatusd::Update::post_status_update($status);
 }
 
 sub _load_config {
@@ -105,7 +105,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc RaumZeitLabor::Status::Update
+    perldoc raumstatusd::Update
 
 
 You can also look for information at:

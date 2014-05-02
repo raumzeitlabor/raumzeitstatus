@@ -1,4 +1,4 @@
-package RaumZeitLabor::Status::Update;
+package raumstatusd::Update;
 
 use 5.014;
 use strict;
@@ -48,4 +48,4 @@ sub post_status_update {
     INFO('DONE (' . $headers->{Status} . ')');
 }
 
-1; # End of RaumZeitLabor::Status::Update
+1; # End of raumstatusd::Update

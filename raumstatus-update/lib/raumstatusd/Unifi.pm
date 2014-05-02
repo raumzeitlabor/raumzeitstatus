@@ -1,4 +1,4 @@
-package RaumZeitLabor::Status::Unifi;
+package raumstatusd::Unifi;
 
 use 5.014;
 use strict;
@@ -125,4 +125,4 @@ sub _unifi_request {
 
 }
 
-1; # End of RaumZeitLabor::Status::Unifi
+1; # End of raumstatusd::Unifi
