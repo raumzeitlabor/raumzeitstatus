@@ -55,6 +55,12 @@ sub login {
     }
 }
 
+sub matches_dynamic_ip {
+    my ($self, $ip) = @_;
+    state $dynamic = qr/^172\.22\.37\./;
+    return $ip =~ $dynamic;
+}
+
 sub list_stations {
     my ($self) = @_;
     state $json = JSON::XS->new->ascii;
@@ -66,8 +72,11 @@ sub list_stations {
         $hdr->{'content-type'} eq 'application/json;charset=ISO-8859-1')
     {
         $stations = $json->decode($body)->{data};
-        INFO(scalar @$stations . ' stations connected to AP');
-        return $stations;
+
+        my @dynamic = grep { $self->matches_dynamic_ip($_->{ip}) } @$stations;
+
+        INFO(scalar @dynamic . ' stations connected to AP');
+        return \@dynamic;
     }
 
     return;
