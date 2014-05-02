@@ -7,7 +7,7 @@ use Test::More;
 plan tests => 1;
 
 BEGIN {
-    use_ok( 'RaumZeitLabor::Status::Update' ) || print "Bail out!\n";
+    use_ok( 'raumstatusd' ) || print "Bail out!\n";
 }
 
-diag( "Testing RaumZeitLabor::Status::Update $RaumZeitLabor::Status::Update::VERSION, Perl $], $^X" );
+diag( "Testing raumstatusd $raumstatusd::VERSION, Perl $], $^X" );
