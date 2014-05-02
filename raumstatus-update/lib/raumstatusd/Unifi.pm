@@ -61,6 +61,15 @@ sub matches_dynamic_ip {
     return $ip =~ $dynamic;
 }
 
+sub list_dynamic_macs {
+    my ($self, @macs) = @_;
+
+    my $stations = $self->list_stations;
+    my @dynamic = grep { $self->matches_dynamic_ip($_->{ip}) } @$stations;
+
+    return grep { $_->{mac} } @dynamic;
+}
+
 sub list_stations {
     my ($self) = @_;
     state $json = JSON::XS->new->ascii;
@@ -73,10 +82,8 @@ sub list_stations {
     {
         $stations = $json->decode($body)->{data};
 
-        my @dynamic = grep { $self->matches_dynamic_ip($_->{ip}) } @$stations;
-
-        INFO(scalar @dynamic . ' stations connected to AP');
-        return \@dynamic;
+        INFO(scalar @$stations . ' stations connected to AP');
+        return @$stations;
     }
 
     return;
