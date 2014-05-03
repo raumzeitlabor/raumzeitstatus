@@ -28,7 +28,6 @@ my $station_json = {
     ]
 };
 
-
 $httpd->reg_cb(
     '/login' => sub {
         my (undef, $req) = @_;
@@ -46,19 +45,15 @@ $httpd->reg_cb(
     },
 );
 
-
 my $config = { uri => "http://localhost:$port", user => '', pass => '' };
 
-my $unifi = raumstatusd::Unifi->new(config => $config);
+my $channel = Coro::Channel->new(1);
+my $unifi = raumstatusd::Unifi->new(config => $config, channel => $channel);
 # XXX
 $unifi->login;
 
 is_deeply($unifi->list_stations, $station_json->{data}, 'list_stations');
 is_deeply($unifi->list_dynamic_macs, [ $expected->{mac} ], 'list_dynamic_macs');
-
-my $channel = Coro::Channel->new(1);
-$raumzeitstatusd::Instance =
-    Test::MockObject->new->set_always('main_queue', $channel);
 
 $unifi->interval(0.01);
 $unifi->run;
@@ -68,8 +63,5 @@ my $e = $channel->get;
 isa_ok($e, 'raumstatusd::Unifi::Event', 'queue->get 2');
 
 is_deeply($e->macs, [ $expected->{mac} ], 'event->macs');
-
-
-
 
 done_testing;

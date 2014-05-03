@@ -34,6 +34,10 @@ has 'interval' => (
     default => sub { 60 },
 );
 
+has 'channel' => (
+    is => 'ro',
+);
+
 sub run {
     my ($self) = @_;
 
@@ -44,7 +48,7 @@ sub run {
             my $macs = $self->list_dynamic_macs;
             my $e = raumstatusd::Unifi::Event->new(macs => $macs);
 
-            $raumzeitstatusd::Instance->main_queue->put($e);
+            $self->channel->put($e);
 
             Coro::AnyEvent::sleep($self->interval);
         }
