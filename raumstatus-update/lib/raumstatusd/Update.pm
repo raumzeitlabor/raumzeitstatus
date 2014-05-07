@@ -1,10 +1,5 @@
 package raumstatusd::Update;
-
-use 5.014;
-use strict;
-use warnings FATAL => 'all';
-
-use Carp;
+use raumstatusd::base;
 
 use Coro;
 use AnyEvent::HTTP;
@@ -15,8 +10,6 @@ use HTTP::Request::Common ();
 use MIME::Base64;
 
 Log::Log4perl->easy_init($DEBUG);
-
-use Moo;
 
 has 'config' => (
     is => 'ro',

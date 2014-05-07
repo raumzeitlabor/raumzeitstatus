@@ -1,8 +1,5 @@
 package raumstatusd;
-
-use 5.014;
-use strict;
-use warnings FATAL => 'all';
+use raumstatusd::base;
 
 our $Instance;
 
@@ -16,8 +13,6 @@ use AnyEvent;
 # initialize AnyEvent as soon as possible to make
 # sure integration of EV/Coro/AnyEvent works as expected.
 BEGIN { AnyEvent::detect; }
-
-use Moo;
 
 has 'config' => (
     is => 'ro',

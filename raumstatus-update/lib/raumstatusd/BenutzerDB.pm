@@ -1,13 +1,9 @@
 package raumstatusd::BenutzerDB;
-
-use strict; use warnings;
-use v5.14;
+use raumstatusd::base;
 
 use DBIx::Simple;
 use SQL::Abstract;
 use Log::Log4perl qw/:easy/;
-
-use Moo;
 
 has 'db' => (
     is => 'rwp',

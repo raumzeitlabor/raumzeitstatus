@@ -1,10 +1,5 @@
 package raumstatusd::Unifi;
-
-use 5.014;
-use strict;
-use warnings FATAL => 'all';
-
-use Carp;
+use raumstatusd::base;
 
 use Coro;
 use Coro::AnyEvent;
@@ -16,8 +11,6 @@ use HTTP::Request::Common ();
 
 Log::Log4perl->easy_init($DEBUG);
 
-use Moo;
-
 package raumstatusd::Unifi::Event {
     use Moo;
 
@@ -26,7 +19,13 @@ package raumstatusd::Unifi::Event {
 
 has 'config' => (
     is => 'ro',
-    default => sub { $raumstatusd::Instance->config->{unifi} },
+    default => sub {
+        # since $raumstatusd::Instance is a package variable
+        # and we only use it here, perl thinks we have a typo and complains.
+        # We just silence the warning lexically.
+        no warnings 'once';
+        $raumstatusd::Instance->config->{unifi}
+    },
 );
 
 has 'interval' => (
