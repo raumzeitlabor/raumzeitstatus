@@ -31,19 +31,25 @@ sub _build_db_connection {
     return $dbix_simple;
 }
 
-sub update_leases {
-    my ($self, $stations) = @_;
+sub run {
+    my ($self, $pipe) = @_;
 
     my $db = $self->db;
 
-    $db->begin_work;
-    $db->query('DELETE FROM leases');
+    async {
+        while (my $stations = $pipe->get) {
+            $db->begin_work;
+            $db->query('DELETE FROM leases');
 
-    for my $station (@$stations) {
-        $self->update_benutzerdb_lease($station);
-    }
+            for my $station (@$stations) {
+                $self->update_benutzerdb_lease($station);
+            }
 
-    $db->commit;
+            $db->commit;
+        }
+    };
+
+    return $self;
 }
 
 sub internal_status {
