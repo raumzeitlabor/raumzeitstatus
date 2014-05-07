@@ -47,21 +47,22 @@ $httpd->reg_cb(
 
 my $config = { uri => "http://localhost:$port", user => '', pass => '' };
 
-my $channel = Coro::Channel->new(1);
-my $unifi = raumstatusd::Unifi->new(config => $config, channel => $channel);
+my $unifi = raumstatusd::Unifi->new(config => $config);
 # XXX
 $unifi->login;
 
 is_deeply($unifi->list_stations, $station_json->{data}, 'list_stations');
 is_deeply($unifi->list_dynamic_macs, [ $expected->{mac} ], 'list_dynamic_macs');
 
-$unifi->interval(0.01);
-$unifi->run;
+$unifi->interval(0.001);
+my $channel = Coro::Channel->new(1);
 
-isa_ok($channel->get, 'raumstatusd::Unifi::Event', 'queue->get 1');
+$unifi->run($channel);
+
+isa_ok($channel->get, 'raumstatusd::Unifi::Event', 'reading from channel');
 my $e = $channel->get;
-isa_ok($e, 'raumstatusd::Unifi::Event', 'queue->get 2');
+isa_ok($e, 'raumstatusd::Unifi::Event', 'reading from channel 2');
 
-is_deeply($e->macs, [ $expected->{mac} ], 'event->macs');
+is_deeply($e->macs, [ $expected->{mac} ], 'event object returns correct amount of macs');
 
 done_testing;
