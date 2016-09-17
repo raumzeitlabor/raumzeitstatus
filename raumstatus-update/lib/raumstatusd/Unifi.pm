@@ -115,21 +115,6 @@ sub list_stations {
     return;
 }
 
-# helper function for AE::HTTP::http_request.
-# takes a list of form parameters and returns a list
-# of 'body' and 'headers' arguments.
-sub body_form_urlencoded {
-    my (@form) = @_;
-
-    # the URL doesn't matter, because we only use the ->content
-    my $r = HTTP::Request::Common::POST('http://', \@form);
-
-    return (
-        body => $r->content,
-        headers => { 'Content-Type' => 'application/x-www-form-urlencoded' },
-    );
-}
-
 sub request {
     my $self = shift @_;
 
