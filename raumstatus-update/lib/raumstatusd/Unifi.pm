@@ -65,23 +65,17 @@ sub station_debuginfo {
 
 sub login {
     my ($self) = @_;
-
     my (undef, $hdr) = $self->request(
-        POST => 'login',
+        POST => 'api/login',
         recurse => 0,
-        body_form_urlencoded(
-            login => 'Login',
-            username => $self->config->{user},
-            password => $self->config->{pass},
-        )
+        body => '{"username":"'.$self->config->{user}.'","password":"'.$self->config->{pass}.'"}',
+        headers => { 'Content-Type' => 'application/json;charset=UTF-8' },
     );
-
-    if ($hdr->{Status} == 302 and
-        $hdr->{location} =~ m{/manage/s/default$}g)
+    if ($hdr->{Status} == 200)
     {
         INFO('logged in');
     }
-    # unifi returns status code 200 if our credentials are incorrect
+    # unifi returns status code 400 if our credentials are incorrect
     else {
         croak('wrong credentials');
     }
@@ -107,11 +101,10 @@ sub list_stations {
     my ($self) = @_;
     state $json = JSON::XS->new->ascii;
 
-    my ($body, $hdr) = $self->request(POST => 'api/stat/sta');
-
+    my ($body, $hdr) = $self->request(POST => 'api/s/default/stat/sta');
     my $stations;
     if ($hdr->{Status} == 200 and
-        $hdr->{'content-type'} eq 'application/json;charset=ISO-8859-1')
+        $hdr->{'content-type'} eq 'application/json;charset=UTF-8')
     {
         $stations = $json->decode($body)->{data};
 
@@ -120,21 +113,6 @@ sub list_stations {
     }
 
     return;
-}
-
-# helper function for AE::HTTP::http_request.
-# takes a list of form parameters and returns a list
-# of 'body' and 'headers' arguments.
-sub body_form_urlencoded {
-    my (@form) = @_;
-
-    # the URL doesn't matter, because we only use the ->content
-    my $r = HTTP::Request::Common::POST('http://', \@form);
-
-    return (
-        body => $r->content,
-        headers => { 'Content-Type' => 'application/x-www-form-urlencoded' },
-    );
 }
 
 sub request {
@@ -168,7 +146,7 @@ sub _unifi_request {
         # unifis' SSL implementation is broken, what we might want to do
         # instead is: probe if they have implemented TLS in the mean
         # time and fall back to sslv3 only after failing.
-        tls_ctx    => { sslv2 => 0, sslv3 => 1, tlsv1 => 0 },
+        tls_ctx    => { sslv2 => 0, sslv3 => 0, tlsv1 => 1 },
         @request_args,
     );
 
