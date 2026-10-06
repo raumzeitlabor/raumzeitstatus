@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">main</string>
-    <string name="rzl_status_image">RZL Status Image</string>
-    <string name="names">Anwesend: %s</string>
+    <string name="app_name">RaumZeitStatus</string>
+    <string name="configuration_title">RaumZeitStatus: Einstellungen</string>
+    <string name="widget_description">Zeigt an, ob das RaumZeitLabor geöffnet ist.</string>
+    <string name="rzl_status_image">Status des RaumZeitLabors</string>
+    <string name="details_unavailable">Weitere Statusdetails sind derzeit nicht verfügbar.</string>
     <string name="SYNC_TIME_DEFAULT">--:--</string>
 </resources>

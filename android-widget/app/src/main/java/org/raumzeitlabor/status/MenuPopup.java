@@ -1,46 +1,35 @@
-/*
- * vim:ts=4:sw=4:expandtab
- */
 package org.raumzeitlabor.status;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Rect;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MenuPopup extends Activity {
+public class MenuPopup extends AppCompatActivity {
     private static final String TAG = "rzlstatus";
-    int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    private int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
 
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        /* Find the widget id from the intent. */
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
+            mAppWidgetId = extras.getInt(
+                    AppWidgetManager.EXTRA_APPWIDGET_ID,
                     AppWidgetManager.INVALID_APPWIDGET_ID);
         }
 
-        /* If they gave us an intent without the widget id, just bail. */
         if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
             finish();
             return;
@@ -48,23 +37,17 @@ public class MenuPopup extends Activity {
 
         setContentView(R.layout.quickaction);
 
-        Rect bounds = (Rect) extras.get("bounds");
-        Log.d(TAG, "start with bounds = " + bounds);
-
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams) getWindow().getAttributes();
-        p.gravity = Gravity.LEFT | Gravity.TOP;
-        p.x = (bounds.left + bounds.right) / 2;
-        p.y = bounds.top;
-        getWindow().setAttributes(p);
-
-        findViewById(R.id.refresh).setOnClickListener(new OnClickListener() {
+        findViewById(R.id.refresh).setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
-                Intent i = StatusProvider.intentForWidget(mAppWidgetId, ".UPDATE");
-                sendBroadcast(i);
+                StatusProvider.enqueueImmediateRefresh(MenuPopup.this, mAppWidgetId);
+                Toast.makeText(MenuPopup.this, "Status wird aktualisiert...", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
-        findViewById(R.id.settings).setOnClickListener(new OnClickListener() {
+
+        findViewById(R.id.settings).setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
                 Intent i = new Intent(MenuPopup.this, Configure.class);
                 i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
@@ -72,43 +55,51 @@ public class MenuPopup extends Activity {
                 finish();
             }
         });
-        if (getIntent().hasExtra("result")) {
-            try {
-                JSONObject result = new JSONObject(getIntent().getStringExtra("result"));
-                StringBuilder people = new StringBuilder();
-                JSONArray peopledetails = result.getJSONObject("details").getJSONArray("laboranten");
-                if (peopledetails.length() > 0)
-                    people.append("Anwesend: ");
-                for (int i = 0; i < peopledetails.length(); i++) {
-                    if (i > 0)
-                        people.append(", ");
-                    people.append(peopledetails.get(i));
-                }
-                if (peopledetails.length() > 0)
-                    people.append("\n");
-                people.append("Geräte: ");
-                people.append(result.getJSONObject("details").getInt("geraete"));
-                ((TextView) findViewById(R.id.statustext)).setText(people.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+
+        updateStatusText();
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // If we've received a touch notification that the user has touched
-        // outside the app, finish the activity.
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams) getWindow().getAttributes();
-        if (event.getX() < p.x - 30 ||
-                event.getY() < p.y - 30 ||
-                event.getX() > p.x + p.width + 30 ||
-                event.getY() > p.y + p.height + 30) {
-            finish();
-            return false;
+    private void updateStatusText() {
+        TextView textView = findViewById(R.id.statustext);
+        SharedPreferences prefs = getSharedPreferences(Configure.PREF_NAME_PREFIX + mAppWidgetId, Context.MODE_PRIVATE);
+        String cachedJson = prefs.getString("cached_result", null);
+        String cachedTime = prefs.getString("cached_time", "--:--");
+
+        StringBuilder text = new StringBuilder();
+
+        if (cachedJson != null) {
+            try {
+                JSONObject json = new JSONObject(cachedJson);
+                String status = json.optString("status", "?");
+                if ("1".equals(status)) {
+                    text.append("Status: Offen\n");
+                } else if ("0".equals(status)) {
+                    text.append("Status: Zu\n");
+                } else {
+                    text.append("Status: Unbekannt\n");
+                }
+
+                JSONObject details = json.optJSONObject("details");
+                if (details != null) {
+                    JSONArray laboranten = details.optJSONArray("laboranten");
+                    if (laboranten != null && laboranten.length() > 0) {
+                        text.append("Anwesend: ");
+                        for (int i = 0; i < laboranten.length(); i++) {
+                            if (i > 0) text.append(", ");
+                            text.append(laboranten.getString(i));
+                        }
+                        text.append("\n");
+                    }
+                    if (details.has("geraete")) {
+                        text.append("Geräte: ").append(details.optInt("geraete", 0)).append("\n");
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error parsing cached status JSON", e);
+            }
         }
 
-        // Delegate everything else to Activity.
-        return super.onTouchEvent(event);
+        text.append("Letztes Update: ").append(cachedTime);
+        textView.setText(text.toString());
     }
 }

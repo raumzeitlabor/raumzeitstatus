@@ -1,33 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="196dp"
+    android:layout_width="220dp"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:background="#000000">
+    android:padding="12dp"
+    android:background="@drawable/corners">
 
     <TextView
         android:id="@+id/statustext"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#ffffff" />
+        android:textColor="#ffffff"
+        android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
 
     <ImageView
         android:id="@+id/refresh"
         android:layout_width="48dp"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/statustext"
         android:layout_height="48dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/statustext"
         android:clickable="true"
+        android:focusable="true"
         android:background="@drawable/background"
+        android:contentDescription="@string/rzl_status_image"
         android:src="@drawable/ic_action_refresh" />
 
     <ImageView
         android:id="@+id/settings"
         android:layout_width="48dp"
-        android:layout_alignParentRight="true"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
         android:layout_below="@id/statustext"
         android:clickable="true"
+        android:focusable="true"
         android:background="@drawable/background"
-        android:layout_height="48dp"
+        android:contentDescription="@string/configuration_title"
         android:src="@drawable/ic_action_settings" />
 </RelativeLayout>

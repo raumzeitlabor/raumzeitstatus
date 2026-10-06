@@ -1,43 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="org.raumzeitlabor.status"
-      android:versionCode="6"
-      android:versionName="1.5">
-    <application android:label="RaumZeitStatus" android:icon="@drawable/auf">
-        <activity android:name=".Configure"
-                  android:label="RaumZeitStatus: Configuration">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:enableOnBackInvokedCallback="true"
+        android:icon="@drawable/auf"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".Configure"
+            android:exported="true"
+            android:label="@string/configuration_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
         </activity>
 
-	<activity
-	  android:name=".MenuPopup"
-	  android:label="Menu Popup"
-	  android:noHistory="true"
-	  android:theme="@android:style/Theme.Panel"
-	 />
+        <activity
+            android:name=".MenuPopup"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:noHistory="true"
+            android:theme="@style/AppTheme.Popup" />
 
-	<receiver android:name="StatusProvider">
-		<intent-filter>
-			<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-		</intent-filter>
-		<intent-filter>
-			<action android:name="org.raumzeitlabor.status.UPDATE" />
-			<data android:scheme="rzlstatus" />
-		</intent-filter>
-		<intent-filter>
-			<action android:name="org.raumzeitlabor.status.CLICK" />
-			<data android:scheme="rzlstatus" />
-		</intent-filter>
-		<intent-filter>
-			<action android:name="org.raumzeitlabor.status.RELOAD" />
-			<data android:scheme="rzlstatus" />
-		</intent-filter>
-		<meta-data android:name="android.appwidget.provider"
-			android:resource="@xml/statusprovider" />
-	</receiver>
-
-	<service android:name=".WantConnectivityService" />
+        <receiver
+            android:name=".StatusProvider"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.raumzeitlabor.status.UPDATE" />
+                <action android:name="org.raumzeitlabor.status.RELOAD" />
+                <data android:scheme="rzlstatus" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/statusprovider" />
+        </receiver>
     </application>
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-</manifest> 
+</manifest>

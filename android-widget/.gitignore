@@ -22,8 +22,16 @@ local.properties
 # Android Studio
 .idea/
 .gradle
+.gradle-user-home/
+.android-sdk/
+.android-home/
+.android-avd/
+.tmp/
+*.png
+!app/src/main/res/**/*.png
 */local.properties
 */out
+build/
 */build/
 */production
 *.iml

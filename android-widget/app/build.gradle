@@ -1,18 +1,66 @@
-apply plugin: 'android'
+plugins {
+    id 'com.android.application'
+}
+
+base {
+    archivesName = 'RaumZeitLabor_status'
+}
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.2"
+    namespace 'org.raumzeitlabor.status'
+    compileSdk 36
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 7
+        applicationId 'org.raumzeitlabor.status'
+        minSdk 24
+        targetSdk 36
+        versionCode 7
+        versionName '1.6'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('../release.jks')
+            storePassword 'rzlstatus'
+            keyAlias 'rzlstatus'
+            keyPassword 'rzlstatus'
+        }
     }
 
     buildTypes {
         release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.work:work-runtime:2.12.0'
+}
+
+tasks.register('copyReleaseApk') {
+    doLast {
+        def releaseDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
+        def original = new File(releaseDir, "RaumZeitLabor_status-release.apk")
+        if (original.exists()) {
+            copy {
+                from original
+                into releaseDir
+                rename { "RaumZeitLabor_status.apk" }
+            }
+        }
+    }
+}
+
+tasks.matching { it.name == 'assembleRelease' }.configureEach {
+    finalizedBy 'copyReleaseApk'
 }

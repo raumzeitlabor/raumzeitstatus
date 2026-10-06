@@ -1,270 +1,190 @@
-/*
- * vim:ts=4:sw=4:expandtab
- */
 package org.raumzeitlabor.status;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONObject;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class StatusProvider extends AppWidgetProvider {
     private static final String TAG = "rzlstatus";
     private static final String URI_SCHEME = "rzlstatus";
     private static final String INTENT_PREFIX = "org.raumzeitlabor.status";
-    private boolean firstUpdate = true;
-    private JSONObject data;
 
     public static Intent intentForWidget(int appWidgetId, String specificIntent) {
         Intent i = new Intent();
         i.setAction(INTENT_PREFIX + specificIntent);
         i.setData(Uri.withAppendedPath(Uri.parse(URI_SCHEME + "://widget/id/"),
-                 String.valueOf(appWidgetId)));
+                String.valueOf(appWidgetId)));
         return i;
     }
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
         Log.d(TAG, "onDeleted");
-        AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        WorkManager workManager = WorkManager.getInstance(context);
         for (int appWidgetId : appWidgetIds) {
-            Log.d(TAG, "Cancelling alarm for widget id " + appWidgetId);
-            Intent i = intentForWidget(appWidgetId, ".UPDATE");
-            PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
-            amgr.cancel(pi);
-            Log.d(TAG, "Deleting SharedPreferences for widget id " + appWidgetId);
-            SharedPreferences prefs = context.getSharedPreferences("widget_" + appWidgetId, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.clear();
-            editor.commit();
+            workManager.cancelUniqueWork("widget_periodic_" + appWidgetId);
+            SharedPreferences prefs = context.getSharedPreferences(Configure.PREF_NAME_PREFIX + appWidgetId, Context.MODE_PRIVATE);
+            prefs.edit().clear().apply();
         }
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] appWidgetIds) {
         Log.d(TAG, "onUpdate");
-
-        AlarmManager amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         for (int appWidgetId : appWidgetIds) {
-            /* To make clicking work before the first answer from server, we
-             * perform an update of the RemoteView on the first call of onUpdate() */
-            if (firstUpdate) {
-                Intent i = intentForWidget(appWidgetId, ".CLICK");
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, 0);
-                RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
-                update.setTextViewText(R.id.lastupdate, "--:--");
-                update.setOnClickPendingIntent(R.id.framelayout, pendingIntent);
-                update.setOnClickPendingIntent(R.id.statusimage, pendingIntent);
-                update.setOnClickPendingIntent(R.id.lastupdate, pendingIntent);
-                manager.updateAppWidget(appWidgetId, update);
-            }
-            initTimer(context, appWidgetId, amgr);
+            updateInitialView(context, manager, appWidgetId);
+            scheduleUpdates(context, appWidgetId);
+            enqueueImmediateRefresh(context, appWidgetId);
         }
-
-        if (firstUpdate)
-            firstUpdate = false;
     }
 
-    private void initTimer(Context context, int appWidgetId, AlarmManager amgr) {
-        if (amgr == null) {
-            amgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        }
-        SharedPreferences prefs = context.getSharedPreferences("widget_" + appWidgetId, Context.MODE_PRIVATE);
-        Log.d(TAG, "Setting up alarm for widget id " + appWidgetId);
+    private void updateInitialView(Context context, AppWidgetManager manager, int appWidgetId) {
+        SharedPreferences prefs = context.getSharedPreferences(Configure.PREF_NAME_PREFIX + appWidgetId, Context.MODE_PRIVATE);
+        String lastTime = prefs.getString("cached_time", "--:--");
+        int drawableRes = prefs.getInt("cached_drawable", R.drawable.unklar);
 
-        Intent i = intentForWidget(appWidgetId, ".UPDATE");
-        PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
-        amgr.cancel(pi);
-        if (prefs.getBoolean("autoRefresh", true)) {
-            String intervalStr = prefs.getString("refreshInterval", "900000");
-            int interval = Integer.valueOf(intervalStr);
-            Log.d(TAG, "interval = " + interval);
-            amgr.setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + interval,
-                interval,
-                pi);
-            context.sendBroadcast(i);
-        } else {
-            Log.d(TAG, "autoRefresh disabled");
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
+        views.setImageViewResource(R.id.statusimage, drawableRes);
+        views.setTextViewText(R.id.lastupdate, lastTime);
+
+        Intent menuIntent = new Intent(context, MenuPopup.class);
+        menuIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                context,
+                appWidgetId,
+                menuIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        views.setOnClickPendingIntent(R.id.framelayout, pendingIntent);
+        views.setOnClickPendingIntent(R.id.statusimage, pendingIntent);
+        views.setOnClickPendingIntent(R.id.lastupdate, pendingIntent);
+
+        manager.updateAppWidget(appWidgetId, views);
+    }
+
+    public static void scheduleUpdates(Context context, int appWidgetId) {
+        WorkManager workManager = WorkManager.getInstance(context);
+        String uniqueWorkName = "widget_periodic_" + appWidgetId;
+
+        SharedPreferences prefs = context.getSharedPreferences(Configure.PREF_NAME_PREFIX + appWidgetId, Context.MODE_PRIVATE);
+        boolean autoRefresh = prefs.getBoolean("autoRefresh", true);
+
+        if (!autoRefresh) {
+            Log.d(TAG, "Auto-refresh disabled for widget " + appWidgetId);
+            workManager.cancelUniqueWork(uniqueWorkName);
+            return;
         }
+
+        String intervalStr = prefs.getString("refreshInterval", "900000");
+        long intervalMillis;
+        try {
+            intervalMillis = Long.parseLong(intervalStr);
+        } catch (NumberFormatException e) {
+            intervalMillis = 900000L;
+        }
+
+        if (intervalMillis < PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS) {
+            intervalMillis = PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS;
+        }
+
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        Data inputData = new Data.Builder()
+                .putInt(StatusUpdateWorker.KEY_WIDGET_ID, appWidgetId)
+                .build();
+
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                StatusUpdateWorker.class,
+                intervalMillis,
+                TimeUnit.MILLISECONDS)
+                .setConstraints(constraints)
+                .setInputData(inputData)
+                .build();
+
+        workManager.enqueueUniquePeriodicWork(
+                uniqueWorkName,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                request
+        );
+        Log.d(TAG, "Scheduled periodic work for widget " + appWidgetId + " at interval " + intervalMillis + "ms");
+    }
+
+    public static void enqueueImmediateRefresh(Context context, int appWidgetId) {
+        WorkManager workManager = WorkManager.getInstance(context);
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        Data inputData = new Data.Builder()
+                .putInt(StatusUpdateWorker.KEY_WIDGET_ID, appWidgetId)
+                .build();
+
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(StatusUpdateWorker.class)
+                .setConstraints(constraints)
+                .setInputData(inputData)
+                .build();
+
+        String uniqueWorkName = "widget_refresh_" + appWidgetId;
+        workManager.enqueueUniqueWork(uniqueWorkName, ExistingWorkPolicy.REPLACE, request);
     }
 
     @Override
-    /** We override onReceive to work around a bug in the AppWidget API:
-    onDelete is never called.
-    See http://groups.google.com/group/android-developers/browse_thread/thread/365d1ed3aac30916/e405ca19df2170e2?pli=1 */
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        Bundle extras = intent.getExtras();
-        if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) {
-            final int appWidgetId = extras.getInt(
-                AppWidgetManager.EXTRA_APPWIDGET_ID,
-                AppWidgetManager.INVALID_APPWIDGET_ID);
-            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                this.onDeleted(context, new int[] { appWidgetId });
-            }
-        } else if (action.startsWith(INTENT_PREFIX)) {
-            /* Extract the widgetId, which is the last part of the URI */
+        if (action != null && action.startsWith(INTENT_PREFIX)) {
             Uri uri = intent.getData();
-            String lastSegment = uri.getLastPathSegment();
-            int widgetId = Integer.valueOf(lastSegment);
-            Log.d(TAG, "id = " + widgetId);
-
-            if (action.equals(INTENT_PREFIX + ".RELOAD")) {
-                initTimer(context, widgetId, null);
-                return;
+            int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+            if (uri != null) {
+                String lastSegment = uri.getLastPathSegment();
+                if (lastSegment != null) {
+                    try {
+                        widgetId = Integer.parseInt(lastSegment);
+                    } catch (NumberFormatException ignored) {}
+                }
             }
 
             if (action.equals(INTENT_PREFIX + ".UPDATE")) {
-                UpdateWidgetTask task = new UpdateWidgetTask();
-                task.setContext(context);
-                task.setWidgetId(widgetId);
-                task.execute((Void)null);
+                if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    enqueueImmediateRefresh(context, widgetId);
+                } else {
+                    AppWidgetManager manager = AppWidgetManager.getInstance(context);
+                    int[] ids = manager.getAppWidgetIds(new ComponentName(context, StatusProvider.class));
+                    for (int id : ids) {
+                        enqueueImmediateRefresh(context, id);
+                    }
+                }
                 return;
             }
 
-            if (action.equals(INTENT_PREFIX + ".CLICK")) {
-                Log.d(TAG, "bounds = " + intent.getSourceBounds());
-                Intent i = new Intent(context, MenuPopup.class);
-                i.putExtra("bounds", intent.getSourceBounds());
-                if(intent.hasExtra("result"))
-                    i.putExtra("result", intent.getStringExtra("result"));
-                i.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(i);
+            if (action.equals(INTENT_PREFIX + ".RELOAD")) {
+                if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    scheduleUpdates(context, widgetId);
+                }
                 return;
             }
-        } else {
-            super.onReceive(context, intent);
         }
+
+        super.onReceive(context, intent);
     }
-
-    class UpdateWidgetTask extends AsyncTask<Void, Void, JSONObject> {
-        private Context context = null;
-        private Integer widgetId = null;
-
-        public void setContext(Context context) {
-            this.context = context;
-        }
-
-        public void setWidgetId(int widgetId) {
-            this.widgetId = widgetId;
-        }
-
-        @Override
-        protected JSONObject doInBackground(Void... param) {
-            Log.d(TAG, "Getting update from status.raumzeitlabor.de");
-
-            HttpGet request = new HttpGet("http://s.rzl.so/api/full.json");
-            request.addHeader("Pragma", "no-cache");
-            request.addHeader("Cache-Control", "no-cache");
-            DefaultHttpClient client = new DefaultHttpClient();
-            try {
-                HttpResponse response = client.execute(request);
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() != 200) {
-                    Log.e(TAG, "HTTP Error: " + statusLine);
-                    throw new Exception("HTTP Error");
-                }
-                InputStream stream = response.getEntity().getContent();
-                BufferedReader reader;
-                try {
-                    reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-                } catch (UnsupportedEncodingException e1) {
-                    reader = new BufferedReader(new InputStreamReader(stream));
-                }
-                StringBuilder sb = new StringBuilder();
-
-                String line = null;
-                try {
-                    while ((line = reader.readLine()) != null) {
-                        sb.append((line + "\n"));
-                    }
-                } catch(Exception e){
-                    return null;
-                } finally {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        return null;
-                    }
-                }
-                String json = sb.toString();
-                return new JSONObject(json);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject result) {
-            Log.d(TAG, "result: " + result);
-
-            data = result;
-
-            char simple_result;
-            try {
-                simple_result = result.getString("status").charAt(0);
-            } catch(Exception e) {
-                simple_result = '!';
-            }
-
-            int resource;
-            switch (simple_result) {
-                case '1': resource = R.drawable.auf; break;
-                case '0': resource = R.drawable.zu; break;
-                default:  resource = R.drawable.unklar;
-            }
-
-            String time = new SimpleDateFormat("HH:mm").format(new Date());
-            Intent i = intentForWidget(widgetId, ".CLICK");
-            if(result != null)
-                i.putExtra("result", result.toString());
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Log.d(TAG, "Pushing update");
-            RemoteViews update = new RemoteViews(context.getPackageName(), R.layout.rzlstatus);
-            update.setImageViewResource(R.id.statusimage, resource);
-            update.setTextViewText(R.id.lastupdate, time);
-            update.setOnClickPendingIntent(R.id.framelayout, pendingIntent);
-            update.setOnClickPendingIntent(R.id.statusimage, pendingIntent);
-            update.setOnClickPendingIntent(R.id.lastupdate, pendingIntent);
-            AppWidgetManager manager = AppWidgetManager.getInstance(context);
-            manager.updateAppWidget(widgetId, update);
-
-            /* Tell the WantConnectivityService that we want an update as soon
-             * as there is network connectivity */
-            if (simple_result == '!') {
-                Intent si = new Intent(context, WantConnectivityService.class);
-                si.putExtra("widgetId", widgetId);
-                context.startService(si);
-            }
-        }
-    }
-
 }
